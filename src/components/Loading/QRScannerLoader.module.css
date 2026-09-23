@@ -1,0 +1,48 @@
+.loaderContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.scanner {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--color-text-tertiary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+}
+
+.scanLine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-accent);
+  box-shadow: 0 0 10px 2px var(--color-accent);
+  animation: scan 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.percentage {
+  font-family: var(--font-mono);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+}

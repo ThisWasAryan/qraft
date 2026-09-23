@@ -22,13 +22,11 @@ The analysis evaluates multiple configuration properties and assigns a status (`
 - **Special Cases**:
   - Identical or near-identical colors automatically result in `danger`.
 
-### 2. Gradient Contrast (Expanded)
-- **Methodology**: Sample gradient at multiple points (`0%`, `25%`, `50%`, `75%`, `100%`) along the gradient path.
+### 2. Gradient Contrast (Absolute Matrix Math)
+- **Methodology**: Gradients are no longer checked against solid fallbacks. The system extracts an array of sample points (all explicit color stops + interpolated 50% midpoints between every stop) from BOTH the foreground gradient (Pattern/Eyes) and the background gradient.
 - **Application**:
-  - Linear gradients: Sample along the vector line.
-  - Radial gradients: Sample center and edges.
-  - Corner square/dot gradients: Check independently.
-- **Evaluation**: Calculate contrast at each sample point against the background. The worst contrast among the sample points determines the severity of the contrast check based on standard contrast thresholds.
+  - The system tests a mathematical matrix of every foreground sample against every background sample.
+- **Evaluation**: The absolute lowest contrast ratio found within that matrix is used as the worst-case scenario. If this worst-case scenario falls below standard contrast thresholds, a warning or danger flag is thrown.
 
 ### 3. Eye Color Contrast
 - **Requirement**: Eyes (finder patterns) are critical for scanner detection, necessitating higher contrast standards.
@@ -85,6 +83,13 @@ The analysis evaluates multiple configuration properties and assigns a status (`
   - `≥ 200px` → Safe (good)
   - `100px - 199px` → Warning (may be too small for some camera focal lengths)
   - `< 100px` → Danger
+
+### 11. Payload Density
+- **Metric**: The byte length of the encoded content compared to the maximum capacity of the selected Error Correction level.
+- **Thresholds**:
+  - **Exceeds capacity**: danger (The QR code will crash or fail to encode entirely).
+  - **Within 90% of capacity**: warning (The modules will be extremely dense and hard to scan at typical sizes).
+  - **Below 90% of capacity**: good
 
 ## Scoring Algorithm
 

@@ -1,0 +1,57 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.swatchWrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.colorInput {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 56px;
+  height: 56px;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.hexInput {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 var(--spacing-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: monospace;
+  font-size: var(--font-size-sm);
+}
+
+.hexInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.2);
+}

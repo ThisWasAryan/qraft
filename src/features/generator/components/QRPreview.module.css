@@ -1,0 +1,58 @@
+.previewContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 60vh;
+  min-height: 300px;
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-weight: 500;
+  z-index: 10;
+}
+
+.errorOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(var(--color-danger), 0.2);
+  color: var(--color-danger);
+  font-weight: 500;
+  z-index: 10;
+}
+
+.qrWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+  width: 100%;
+  height: 100%;
+}
+
+.qrWrapper canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

@@ -1,0 +1,13 @@
+.toggle {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+}
+
+.toggle:hover {
+  color: var(--color-text-primary);
+}

@@ -236,7 +236,7 @@ erDiagram
 | :--- | :--- | :--- |
 | **QRConfig.content** | `{ type: 'url', url: 'https://qraft.app' }` | Starting state |
 | **QRConfig.errorCorrection** | `'Q'` | 25% error correction capacity, good balance |
-| **QRStyle.width / height** | `300` | Minimum recommended baseline |
+| **QRStyle.width / height** | `1000` | Internally scaled for high-res margins, downscaled for preview |
 | **QRStyle.margin** | `0` | Quiet zone for the library |
 | **QRDotOptions** | `{ type: 'square', color: '#000000' }` | |
 | **QRCornerSquareOptions** | `{ type: 'square', color: '#000000' }` | Inherits from dots if not set |

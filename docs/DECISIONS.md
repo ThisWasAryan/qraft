@@ -76,13 +76,13 @@ This document records all significant architectural decisions for the Qraft proj
 **Alternatives Considered**: Modifying the library to draw plates natively, or trying to inject SVG nodes post-render.
 **Consequences**: This approach is simple, robust, and allows the QR library to handle the complex math of centering the combined logo and excavating the correct number of dots behind it.
 
-### ADR-010: Curated Design Randomizer
+### ADR-010: Mathematical Generative Randomizer
 **Status**: Accepted
 **Date**: 2024-09
 **Context**: We want a "randomize" or "surprise me" feature to help users discover styles quickly.
-**Decision**: We will use a curated randomized approach using pre-validated JSON palettes (~25 configurations) rather than pure math-based randomization.
-**Alternatives Considered**: Pure randomization of all properties.
-**Consequences**: Pure randomization often generates unscannable QR codes due to poor contrast or clashing styles. Curated palettes guarantee scannability and aesthetic quality. When randomized, we will force the error correction level to 'H'. The randomizer will alter dot types, corner types, colors, and gradients, but will intentionally EXCLUDE the logo, frame, and CTA, as these are highly user/brand-specific.
+**Decision**: We will use a true mathematical generative engine (`generateRandomPalette.ts`) using HSL constraints to generate infinite vibrant color combinations and gradients.
+**Alternatives Considered**: A curated array of static JSON palettes (initially implemented, but rejected because it felt highly repetitive and users received the exact same designs).
+**Consequences**: Pure randomization can sometimes generate clashing colors. To prevent unscannable QR codes, we paired this generative engine with an absolute matrix contrast check (`getWorstCaseContrast()`) that strictly filters out any gradients or colors that do not meet WCAG contrast thresholds. When randomized, we force the error correction level to 'H'. The randomizer alters dot types, corner types, colors, and gradients, but intentionally EXCLUDES the logo, frame, and CTA, as these are highly user/brand-specific.
 
 ### ADR-011: Undo/Redo via zundo
 **Status**: Accepted
