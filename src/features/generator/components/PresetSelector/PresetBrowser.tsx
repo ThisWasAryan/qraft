@@ -8,6 +8,7 @@ import githubLightLogo from '../../../../assets/presets/logos/github-light.svg';
 
 const CATEGORIES: { label: string; value: PresetCategory | 'all' }[] = [
   { label: 'All', value: 'all' },
+  { label: 'Standard', value: 'standard' },
   { label: 'Messaging', value: 'messaging' },
   { label: 'Social', value: 'social' },
   { label: 'Developer', value: 'developer' },
@@ -29,6 +30,12 @@ function getThemedPreset(preset: QRPreset, theme: 'light' | 'dark'): QRPreset {
     if (p.style.cornerSquareOptions) p.style.cornerSquareOptions.color = '#F3F4F6';
     if (p.style.cornerDotOptions) p.style.cornerDotOptions.color = '#F3F4F6';
     if (p.style.logo) p.style.logo.src = githubLightLogo;
+  }
+
+  if (p.id === 'default') {
+    if (p.style.dotOptions) p.style.dotOptions.color = '#FFFFFF';
+    if (p.style.cornerSquareOptions) p.style.cornerSquareOptions.color = '#FFFFFF';
+    if (p.style.cornerDotOptions) p.style.cornerDotOptions.color = '#FFFFFF';
   }
 
   return p;

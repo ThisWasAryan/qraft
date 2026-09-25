@@ -147,6 +147,9 @@ export interface QRStyle {
   
   // Frame (Qraft wrapper, not qr-code-styling native)
   frame?: QRFrame;
+
+  // Editor Settings
+  autoAdjustMargins?: boolean;
 }
 
 // === Complete QR Config ===
@@ -157,7 +160,7 @@ export interface QRConfig {
 }
 
 // === Presets ===
-export type PresetCategory = 'messaging' | 'social' | 'developer' | 'music';
+export type PresetCategory = 'standard' | 'messaging' | 'social' | 'developer' | 'music';
 
 export interface QRPreset {
   id: string;
@@ -234,5 +237,6 @@ export const DEFAULT_QR_CONFIG: QRConfig = {
     cornerSquareOptions: { type: 'square', color: '#000000' },
     cornerDotOptions: { type: 'square', color: '#000000' },
     backgroundOptions: { color: '#FFFFFF' },
+    autoAdjustMargins: true,
   },
 };

@@ -73,10 +73,32 @@ export const useQRStore = create<QRState>()(
             newErrorCorrection = maxLevel;
           }
           
+          let newStyle = { ...state.config.style };
+          
+          if (newStyle.autoAdjustMargins !== false) {
+             const tempConfig = {
+               ...state.config,
+               content: newContent,
+               errorCorrection: newErrorCorrection,
+             };
+             const report = analyzeReliability(tempConfig);
+             
+             const quietZoneCheck = report.checks.find(c => c.id === 'quiet-zone');
+             if (quietZoneCheck && (quietZoneCheck.severity === 'warning' || quietZoneCheck.severity === 'danger')) {
+               newStyle.margin = 40;
+             }
+             
+             const framePaddingCheck = report.checks.find(c => c.id === 'quiet-zone-frame');
+             if (framePaddingCheck && (framePaddingCheck.severity === 'warning' || framePaddingCheck.severity === 'danger') && newStyle.frame) {
+               newStyle.frame = { ...newStyle.frame, padding: 40 };
+             }
+          }
+          
           return {
             config: {
               ...state.config,
               content: newContent,
+              style: newStyle,
               errorCorrection: newErrorCorrection,
             },
             isContentValid: validation.isValid,
@@ -101,10 +123,32 @@ export const useQRStore = create<QRState>()(
             newErrorCorrection = maxLevel;
           }
 
+          let newStyle = { ...state.config.style };
+          
+          if (newStyle.autoAdjustMargins !== false) {
+             const tempConfig = {
+               ...state.config,
+               content: newContent,
+               errorCorrection: newErrorCorrection,
+             };
+             const report = analyzeReliability(tempConfig);
+             
+             const quietZoneCheck = report.checks.find(c => c.id === 'quiet-zone');
+             if (quietZoneCheck && (quietZoneCheck.severity === 'warning' || quietZoneCheck.severity === 'danger')) {
+               newStyle.margin = 40;
+             }
+             
+             const framePaddingCheck = report.checks.find(c => c.id === 'quiet-zone-frame');
+             if (framePaddingCheck && (framePaddingCheck.severity === 'warning' || framePaddingCheck.severity === 'danger') && newStyle.frame) {
+               newStyle.frame = { ...newStyle.frame, padding: 40 };
+             }
+          }
+
           return {
             config: {
               ...state.config,
               content: newContent,
+              style: newStyle,
               errorCorrection: newErrorCorrection,
             },
             isContentValid: validation.isValid,
@@ -114,16 +158,36 @@ export const useQRStore = create<QRState>()(
       },
 
       setStyle: (styleUpdate) => {
-        set((state) => ({
-          activePresetId: null,
-          config: {
-            ...state.config,
-            style: {
-              ...state.config.style,
-              ...styleUpdate,
+        set((state) => {
+          let newStyle = { ...state.config.style, ...styleUpdate };
+          
+          if (styleUpdate.autoAdjustMargins === true) {
+            // Instantly evaluate when toggled ON
+             const tempConfig = {
+               ...state.config,
+               style: newStyle,
+             };
+             const report = analyzeReliability(tempConfig);
+             
+             const quietZoneCheck = report.checks.find(c => c.id === 'quiet-zone');
+             if (quietZoneCheck && (quietZoneCheck.severity === 'warning' || quietZoneCheck.severity === 'danger')) {
+               newStyle.margin = 40;
+             }
+             
+             const framePaddingCheck = report.checks.find(c => c.id === 'quiet-zone-frame');
+             if (framePaddingCheck && (framePaddingCheck.severity === 'warning' || framePaddingCheck.severity === 'danger') && newStyle.frame) {
+               newStyle.frame = { ...newStyle.frame, padding: 40 };
+             }
+          }
+          
+          return {
+            activePresetId: null,
+            config: {
+              ...state.config,
+              style: newStyle,
             },
-          },
-        }));
+          };
+        });
       },
 
       setErrorCorrection: (level) => {
@@ -214,13 +278,13 @@ export const useQRStore = create<QRState>()(
               }
               changed = true;
             }
-            if (check.id === 'errorCorrection') {
+            if (check.id === 'error-correction-logo' || check.id === 'error-correction') {
               newConfig.errorCorrection = 'H';
               changed = true;
             }
-            if (check.id === 'logo') {
+            if (check.id === 'logo-size') {
               if (newStyle.logo) {
-                newStyle.logo = { ...newStyle.logo, size: 0.3 };
+                newStyle.logo = { ...newStyle.logo, size: 0.2 };
                 changed = true;
               }
             }

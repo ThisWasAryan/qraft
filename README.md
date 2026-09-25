@@ -97,6 +97,7 @@ QRaft supports placing custom images inside the QR code.
 - Circle, rounded-square, and square logo plates
 - Independent plate color
 - Configurable plate padding
+- Dedicated logo style reset control
 
 Logo configuration is incorporated into the reliability analysis and error-correction logic.
 

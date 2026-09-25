@@ -1,7 +1,10 @@
 import type { QRLogo } from '../domain/types';
 
 export async function processLogo(logo: QRLogo): Promise<string> {
-  if (!logo.plate || !logo.plate.enabled) {
+  const hasPlate = logo.plate && logo.plate.enabled;
+  const hasOpacity = logo.opacity !== undefined && logo.opacity < 1;
+
+  if (!hasPlate && !hasOpacity) {
     return logo.src;
   }
 
@@ -16,49 +19,62 @@ export async function processLogo(logo: QRLogo): Promise<string> {
         return;
       }
 
-      // We need to determine the output size.
-      // Let's assume a fixed high-res internal size for crispness, then scale down.
-      // 512x512 is a good base for the plate.
+      // If we don't have a plate, the canvas shouldn't be hardcoded to 512x512
+      // because we want the logo's native aspect ratio or just a standard size.
+      // We can stick to 512x512 but the logo might be stretched if we are not careful.
+      // Wait, drawImage with 4 args scales the image. We should preserve aspect ratio.
       const plateSize = 512;
-      canvas.width = plateSize;
-      canvas.height = plateSize;
-
-      const padding = logo.plate!.padding;
-      // Map padding (0-20ish) to internal pixels. Let's say padding is % of size.
-      // Actually, padding in QRStyle is usually pixels relative to the QR size, but here we don't know the QR size.
-      // Let's assume padding is a relative percentage of the logo's own dimension, or just a fixed ratio.
-      // For simplicity, padding is used as a percentage (0-30%) of the plate size.
-      const paddingRatio = padding / 100;
-      const logoDrawSize = plateSize * (1 - paddingRatio * 2);
-      const logoOffset = plateSize * paddingRatio;
-
-      ctx.fillStyle = logo.plate!.color;
       
-      if (logo.plate!.shape === 'circle') {
-        ctx.beginPath();
-        ctx.arc(plateSize / 2, plateSize / 2, plateSize / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (logo.plate!.shape === 'rounded-square') {
-        const radius = plateSize * 0.2; // 20% rounding
-        ctx.beginPath();
-        ctx.moveTo(radius, 0);
-        ctx.lineTo(plateSize - radius, 0);
-        ctx.quadraticCurveTo(plateSize, 0, plateSize, radius);
-        ctx.lineTo(plateSize, plateSize - radius);
-        ctx.quadraticCurveTo(plateSize, plateSize, plateSize - radius, plateSize);
-        ctx.lineTo(radius, plateSize);
-        ctx.quadraticCurveTo(0, plateSize, 0, plateSize - radius);
-        ctx.lineTo(0, radius);
-        ctx.quadraticCurveTo(0, 0, radius, 0);
-        ctx.closePath();
-        ctx.fill();
-      } else {
-        // square
-        ctx.fillRect(0, 0, plateSize, plateSize);
+      let canvasW = plateSize;
+      let canvasH = plateSize;
+      
+      if (!hasPlate) {
+         // Use the image's original dimensions to avoid distortion
+         canvasW = img.width;
+         canvasH = img.height;
       }
 
-      // Draw the original image in the center
-      ctx.drawImage(img, logoOffset, logoOffset, logoDrawSize, logoDrawSize);
+      canvas.width = canvasW;
+      canvas.height = canvasH;
+
+      if (hasPlate) {
+        const padding = logo.plate!.padding;
+        const paddingRatio = padding / 100;
+        const logoDrawSizeW = canvasW * (1 - paddingRatio * 2);
+        const logoDrawSizeH = canvasH * (1 - paddingRatio * 2);
+        const logoOffsetX = canvasW * paddingRatio;
+        const logoOffsetY = canvasH * paddingRatio;
+
+        ctx.fillStyle = logo.plate!.color;
+        
+        if (logo.plate!.shape === 'circle') {
+          ctx.beginPath();
+          ctx.arc(canvasW / 2, canvasH / 2, Math.min(canvasW, canvasH) / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (logo.plate!.shape === 'rounded-square') {
+          const radius = Math.min(canvasW, canvasH) * 0.2; 
+          ctx.beginPath();
+          ctx.moveTo(radius, 0);
+          ctx.lineTo(canvasW - radius, 0);
+          ctx.quadraticCurveTo(canvasW, 0, canvasW, radius);
+          ctx.lineTo(canvasW, canvasH - radius);
+          ctx.quadraticCurveTo(canvasW, canvasH, canvasW - radius, canvasH);
+          ctx.lineTo(radius, canvasH);
+          ctx.quadraticCurveTo(0, canvasH, 0, canvasH - radius);
+          ctx.lineTo(0, radius);
+          ctx.quadraticCurveTo(0, 0, radius, 0);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.fillRect(0, 0, canvasW, canvasH);
+        }
+
+        ctx.globalAlpha = logo.opacity ?? 1;
+        ctx.drawImage(img, logoOffsetX, logoOffsetY, logoDrawSizeW, logoDrawSizeH);
+      } else {
+        ctx.globalAlpha = logo.opacity ?? 1;
+        ctx.drawImage(img, 0, 0, canvasW, canvasH);
+      }
 
       resolve(canvas.toDataURL('image/png'));
     };

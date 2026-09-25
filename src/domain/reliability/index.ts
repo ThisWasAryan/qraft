@@ -5,12 +5,16 @@ import { checkErrorCorrection } from './errorCorrection';
 import { checkLogoSize } from './logo';
 import { checkModuleShape, checkCornerShape, checkOutputSize, checkGradientContrast } from './moduleStyle';
 import { checkDensity } from './density';
+import { getEncodedContentString } from '../../utils/capacity';
 
 export function analyzeReliability(config: QRConfig): QRReliabilityReport {
+  const dataString = getEncodedContentString(config.content);
+  const byteLength = new Blob([dataString]).size;
+
   const checks: QRReliabilityCheck[] = [
     checkContrast(config.style.dotOptions, config.style.backgroundOptions),
     checkEyeContrast(config.style.cornerSquareOptions, config.style.cornerDotOptions, config.style.backgroundOptions),
-    checkQuietZone(config.style.margin, config.style.frame),
+    checkQuietZone(config.style.margin, config.style.frame, byteLength),
     checkErrorCorrection(config.errorCorrection, config.style.logo),
     checkLogoSize(config.style.logo, config.errorCorrection),
     checkModuleShape(config.style.dotOptions, config.errorCorrection, config.style.width),

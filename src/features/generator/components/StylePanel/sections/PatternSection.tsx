@@ -15,6 +15,7 @@ const DOT_TYPES: { id: QRDotType; label: string }[] = [
 export const PatternSection: React.FC = () => {
   const dotType = useQRStore((state) => state.config.style.dotOptions.type);
   const margin = useQRStore((state) => state.config.style.margin);
+  const autoAdjustMargins = useQRStore((state) => state.config.style.autoAdjustMargins ?? true);
   const setStyle = useQRStore((state) => state.setStyle);
 
   const handleTypeChange = (type: QRDotType) => {
@@ -50,13 +51,39 @@ export const PatternSection: React.FC = () => {
       </div>
       </div>
       
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--spacing-md)', backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
+        <div>
+          <label style={{ display: 'block', fontSize: 'var(--font-size-sm)', fontWeight: 500, color: 'var(--color-text)', marginBottom: '4px' }}>Auto-Adjust Margins</label>
+          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>Automatically optimize quiet zone when text changes</span>
+        </div>
+        <label style={{ position: 'relative', display: 'inline-block', width: '40px', height: '20px' }}>
+          <input 
+            type="checkbox" 
+            checked={autoAdjustMargins}
+            onChange={(e) => setStyle({ autoAdjustMargins: e.target.checked })}
+            style={{ opacity: 0, width: 0, height: 0 }}
+          />
+          <span style={{
+            position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: autoAdjustMargins ? 'var(--color-primary)' : 'var(--color-border)',
+            transition: '.4s', borderRadius: '34px',
+          }}>
+            <span style={{
+              position: 'absolute', content: '""', height: '16px', width: '16px', left: '2px', bottom: '2px',
+              backgroundColor: 'white', transition: '.4s', borderRadius: '50%',
+              transform: autoAdjustMargins ? 'translateX(20px)' : 'translateX(0)'
+            }} />
+          </span>
+        </label>
+      </div>
+
       <Slider
         label="Quiet Zone (Margin) in px"
         value={margin ?? 0}
         min={0}
         max={200}
         step={5}
-        onChange={(val) => setStyle({ margin: val })}
+        onChange={(val) => setStyle({ margin: val, autoAdjustMargins: false })}
       />
     </div>
   );

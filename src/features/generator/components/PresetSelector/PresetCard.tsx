@@ -35,16 +35,23 @@ export const PresetCard: React.FC<PresetCardProps> = ({ preset, isActive, onAppl
     return () => observer.disconnect();
   }, [index]);
 
-  const previewConfig: QRConfig = useMemo(() => ({
-    content: { type: 'url', url: PREVIEW_PAYLOAD },
-    errorCorrection: preset.errorCorrection ?? 'H',
-    style: {
-      ...DEFAULT_QR_CONFIG.style,
-      ...preset.style,
-      width: 120,
-      height: 120,
-    },
-  }), [preset.errorCorrection, preset.style]);
+  const previewConfig: QRConfig = useMemo(() => {
+    const originalMargin = preset.style.margin ?? DEFAULT_QR_CONFIG.style.margin ?? 0;
+    const scale = 120 / 1000;
+    const scaledMargin = Math.round(originalMargin * scale);
+
+    return {
+      content: { type: 'url', url: PREVIEW_PAYLOAD },
+      errorCorrection: preset.errorCorrection ?? 'H',
+      style: {
+        ...DEFAULT_QR_CONFIG.style,
+        ...preset.style,
+        width: 120,
+        height: 120,
+        margin: scaledMargin,
+      },
+    };
+  }, [preset.errorCorrection, preset.style]);
 
   return (
     <button
