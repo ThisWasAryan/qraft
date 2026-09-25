@@ -84,6 +84,9 @@ Both components support independent colors and gradient styling.
 
 The QR margin can be configured independently, allowing control over the clear space surrounding the QR symbol.
 
+- Dedicated margin sizing controls
+- Auto-adjust margins based on scan reliability and payload density recommendations
+
 ### Logo Support
 
 QRaft supports placing custom images inside the QR code.
