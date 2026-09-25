@@ -12,6 +12,37 @@
 
 .madeBy {
   font-weight: var(--font-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: color 0.3s ease;
+  cursor: default;
+}
+
+.madeBy:hover {
+  color: var(--color-text-primary);
+}
+
+.heart {
+  color: var(--color-text-tertiary);
+  fill: transparent;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease, fill 0.3s ease;
+}
+
+.madeBy:hover .heart {
+  color: #ef4444;
+  fill: #ef4444;
+  transform: scale(1.15);
+  animation: heartbeat 1.5s infinite;
+}
+
+@keyframes heartbeat {
+  0% { transform: scale(1.15); }
+  15% { transform: scale(1.35); }
+  30% { transform: scale(1.15); }
+  45% { transform: scale(1.35); }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1.15); }
 }
 
 .links {
@@ -24,7 +55,7 @@
 .link {
   color: var(--color-text-tertiary);
   text-decoration: none;
-  transition: color var(--transition-color);
+  transition: color 0.3s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: flex;
   align-items: center;
   gap: var(--space-2);
@@ -32,4 +63,5 @@
 
 .link:hover {
   color: var(--color-accent);
+  transform: translateY(-2px);
 }

@@ -10,7 +10,17 @@ import type {
 } from 'qr-code-styling';
 import type { QRConfig } from '../domain/types';
 import { validateQRContent } from '../domain/validators';
-import { encodeUrlPayload, encodeTextPayload, encodeEmailPayload, encodePhonePayload, encodeWifiPayload } from '../domain/encoders';
+import { 
+  encodeUrlPayload, 
+  encodeTextPayload, 
+  encodeEmailPayload, 
+  encodePhonePayload, 
+  encodeWifiPayload,
+  encodeSmsPayload,
+  encodeWhatsAppPayload,
+  encodeVCardPayload,
+  encodeUpiPayload
+} from '../domain/encoders';
 
 export function getPayloadString(config: QRConfig): string {
   const validation = validateQRContent(config.content);
@@ -35,6 +45,14 @@ export function getPayloadString(config: QRConfig): string {
       return encodePhonePayload(config.content.number);
     case 'wifi':
       return encodeWifiPayload(config.content);
+    case 'sms':
+      return encodeSmsPayload(config.content);
+    case 'whatsapp':
+      return encodeWhatsAppPayload(config.content);
+    case 'vcard':
+      return encodeVCardPayload(config.content);
+    case 'upi':
+      return encodeUpiPayload(config.content);
     default:
       return '';
   }

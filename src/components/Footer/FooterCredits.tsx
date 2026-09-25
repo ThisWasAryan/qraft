@@ -1,11 +1,13 @@
 import React from 'react';
-import { Code2, Briefcase, Camera, Mail } from 'lucide-react';
+import { Code2, Briefcase, Camera, Mail, Heart } from 'lucide-react';
 import styles from './FooterCredits.module.css';
 
 export const FooterCredits: React.FC = () => {
   return (
     <footer className={styles.footer}>
-      <div className={styles.madeBy}>Made by Aryan Raj</div>
+      <div className={styles.madeBy}>
+        Made with <Heart size={14} className={styles.heart} /> by Aryan Raj
+      </div>
       <div className={styles.links}>
         <a href="https://github.com/ThisWasAryan" target="_blank" rel="noreferrer" className={styles.link}>
           <Code2 size={16} /> GitHub

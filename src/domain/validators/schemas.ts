@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
 export const urlSchema = z.object({
   type: z.literal('url'),
@@ -40,11 +41,14 @@ export const emailSchema = z.object({
 
 export const phoneSchema = z.object({
   type: z.literal('phone'),
-  number: z.string() // It is named 'number' in types.ts (PhoneContent), not 'phone'
+  number: z.string()
     .min(1, 'Phone number is required')
     .refine(
-      (val) => val.replace(/\D/g, '').length >= 7,
-      'Please enter a valid phone number (at least 7 digits)'
+      (val) => {
+        const parsed = parsePhoneNumberFromString(val);
+        return parsed ? parsed.isValid() : val.replace(/\D/g, '').length >= 7;
+      },
+      'Please enter a valid international phone number'
     ),
 });
 
@@ -77,4 +81,70 @@ export const wifiSchema = z.object({
       path: ['password'],
     });
   }
+});
+
+export const smsSchema = z.object({
+  type: z.literal('sms'),
+  number: z.string()
+    .min(1, 'Phone number is required')
+    .refine(
+      (val) => {
+        const parsed = parsePhoneNumberFromString(val);
+        return parsed ? parsed.isValid() : val.replace(/\D/g, '').length >= 7;
+      },
+      'Please enter a valid international phone number'
+    ),
+  message: z.string().optional(),
+});
+
+export const whatsappSchema = z.object({
+  type: z.literal('whatsapp'),
+  number: z.string()
+    .min(1, 'Phone number is required')
+    .refine(
+      (val) => {
+        const parsed = parsePhoneNumberFromString(val);
+        return parsed ? parsed.isValid() : val.replace(/\D/g, '').length >= 7;
+      },
+      'Please enter a valid international phone number'
+    ),
+  message: z.string().optional(),
+});
+
+export const vcardSchema = z.object({
+  type: z.literal('vcard'),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+  organization: z.string().optional(),
+  title: z.string().optional(),
+  phone: z.string().optional().refine(val => !val || (() => {
+    const parsed = parsePhoneNumberFromString(val);
+    return parsed ? parsed.isValid() : val.replace(/\D/g, '').length >= 7;
+  })(), 'Please enter a valid international phone number'),
+  email: z.string().email('Invalid email address').optional().or(z.literal('')),
+  url: z.string().url('Invalid URL').optional().or(z.literal('')),
+  street: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
+  country: z.string().optional(),
+  notes: z.string().optional(),
+}).refine(data => data.firstName || data.lastName, {
+  message: "At least a first or last name is required",
+  path: ['firstName']
+});
+
+export const upiSchema = z.object({
+  type: z.literal('upi'),
+  payeeAddress: z.string()
+    .min(1, 'Payee Address (UPI ID) is required')
+    .regex(/^[\w.-]+@[\w.-]+$/, 'Invalid UPI ID format (e.g., name@bank)'),
+  payeeName: z.string().min(1, 'Payee Name is required'),
+  amount: z.string().optional().refine(val => {
+    if (!val) return true;
+    return /^\d+(\.\d{1,2})?$/.test(val) && parseFloat(val) > 0;
+  }, 'Amount must be greater than 0 with up to 2 decimal places'),
+  currency: z.string().min(1, 'Currency is required').default('INR'),
+  transactionNote: z.string().max(50, 'Note must not exceed 50 characters').optional(),
+  isFixedAmount: z.boolean().default(true),
 });

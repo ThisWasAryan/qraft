@@ -1,13 +1,40 @@
 // === Content Types ===
-export type QRContentType = 'url' | 'text' | 'email' | 'phone' | 'wifi';
+export type QRContentType = 'url' | 'text' | 'email' | 'phone' | 'wifi' | 'sms' | 'whatsapp' | 'vcard' | 'upi';
 
-export type QRContent = URLContent | TextContent | EmailContent | PhoneContent | WiFiContent;
+export type QRContent = URLContent | TextContent | EmailContent | PhoneContent | WiFiContent | SMSContent | WhatsAppContent | VCardContent | UPIContent;
 
 export interface URLContent { type: 'url'; url: string; }
 export interface TextContent { type: 'text'; text: string; }
 export interface EmailContent { type: 'email'; to: string; subject?: string; body?: string; cc?: string; bcc?: string; }
 export interface PhoneContent { type: 'phone'; number: string; }
 export interface WiFiContent { type: 'wifi'; ssid: string; password: string; authType: 'WPA' | 'WEP' | 'nopass'; hidden: boolean; }
+export interface SMSContent { type: 'sms'; number: string; message: string; }
+export interface WhatsAppContent { type: 'whatsapp'; number: string; message: string; }
+export interface VCardContent {
+  type: 'vcard';
+  firstName: string;
+  lastName: string;
+  organization: string;
+  title: string;
+  phone: string;
+  email: string;
+  url: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  notes: string;
+}
+export interface UPIContent {
+  type: 'upi';
+  payeeAddress: string;
+  payeeName: string;
+  amount: string;
+  currency: string;
+  transactionNote: string;
+  isFixedAmount: boolean;
+}
 
 // === Error Correction ===
 export type ErrorCorrectionLevel = 'L' | 'M' | 'Q' | 'H';

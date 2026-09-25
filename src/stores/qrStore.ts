@@ -32,6 +32,10 @@ const initialContentByType: Record<QRContentType, QRContent> = {
   email: { type: 'email', to: '' },
   phone: { type: 'phone', number: '' },
   wifi: { type: 'wifi', ssid: '', password: '', authType: 'WPA', hidden: false },
+  sms: { type: 'sms', number: '', message: '' },
+  whatsapp: { type: 'whatsapp', number: '', message: '' },
+  vcard: { type: 'vcard', firstName: '', lastName: '', organization: '', title: '', phone: '', email: '', url: '', street: '', city: '', state: '', zip: '', country: '', notes: '' },
+  upi: { type: 'upi', payeeAddress: '', payeeName: '', amount: '', currency: 'INR', transactionNote: '', isFixedAmount: true },
 };
 
 export const useQRStore = create<QRState>()(

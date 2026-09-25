@@ -41,11 +41,16 @@ export const ReliabilityIndicator: React.FC = () => {
       backgroundColor: 'var(--color-surface)'
     }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)', marginBottom: 'var(--spacing-sm)', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
-            {getIcon(report.overallScore)}
-            <h3 style={{ fontSize: 'var(--font-size-md)', fontWeight: 600 }}>
-              Scan Reliability: {getTitle(report.overallScore)}
-            </h3>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-xs)' }}>
+            <div style={{ marginTop: 2 }}>{getIcon(report.overallScore)}</div>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: 'var(--font-size-md)', fontWeight: 600 }}>
+                Scan Reliability
+              </span>
+              <span style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)', marginTop: 2 }}>
+                {getTitle(report.overallScore)}
+              </span>
+            </div>
           </div>
           {(report.overallScore === 'warning' || report.overallScore === 'danger') && (
             <button

@@ -3,12 +3,21 @@ import { Undo2, Redo2, Dices, History } from 'lucide-react';
 import { useQRStore } from '../../stores/qrStore';
 import { useKeyboardShortcut } from '../../hooks/useKeyboardShortcut';
 import styles from './Header.module.css';
-
+import { useState, useEffect } from 'react';
 import { useStore } from 'zustand';
 
 export const Header = () => {
   const { undo, redo, pastStates, futureStates } = useStore(useQRStore.temporal, (state) => state);
   const randomizeDesign = useQRStore(state => state.randomizeDesign);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleUndo = () => { if (pastStates.length > 0) undo(); };
   const handleRedo = () => { if (futureStates.length > 0) redo(); };
@@ -17,7 +26,10 @@ export const Header = () => {
   useKeyboardShortcut({ key: 'z', ctrlKey: true, shiftKey: true }, handleRedo);
 
   return (
-    <header className={styles.header}>
+    <header className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}>
+      <div className={styles.blurWrapper}>
+        <div className={styles.blurInner}></div>
+      </div>
       <div className={styles.container}>
         <div className={styles.brand}>
           <div className={styles.logo}>
@@ -42,7 +54,6 @@ export const Header = () => {
           >
             <Redo2 size={18} />
           </button>
-          <div className={styles.divider} style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 8px' }} />
           <button 
             onClick={randomizeDesign}
             className={styles.actionBtn}
@@ -64,7 +75,6 @@ export const Header = () => {
           >
             <History size={18} />
           </button>
-          <div className={styles.divider} style={{ width: '1px', height: '20px', background: 'var(--border)', margin: '0 8px' }} />
           <ThemeToggle />
         </div>
       </div>

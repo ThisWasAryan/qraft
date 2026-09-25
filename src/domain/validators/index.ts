@@ -1,5 +1,15 @@
 import type { QRContent, QRValidationResult, QRFieldError } from '../types';
-import { urlSchema, textSchema, emailSchema, phoneSchema, wifiSchema } from './schemas';
+import { 
+  urlSchema, 
+  textSchema, 
+  emailSchema, 
+  phoneSchema, 
+  wifiSchema,
+  smsSchema,
+  whatsappSchema,
+  vcardSchema,
+  upiSchema
+} from './schemas';
 
 export function validateQRContent(content: QRContent): QRValidationResult {
   let warnings: QRFieldError[] = [];
@@ -48,7 +58,6 @@ export function validateQRContent(content: QRContent): QRValidationResult {
       const result = emailSchema.safeParse(content);
       handleResult(result);
       if (result.success) {
-        // approximate length of the generated mailto URI
         const mailtoLen = 7 + content.to.length + (content.subject?.length || 0) + (content.body?.length || 0) + (content.cc?.length || 0) + (content.bcc?.length || 0);
         if (mailtoLen > 500) {
           warnings.push({ field: 'email', message: 'Long email templates may result in dense QR codes.', severity: 'warning' });
@@ -76,6 +85,39 @@ export function validateQRContent(content: QRContent): QRValidationResult {
         if (content.password && /[;:,\\"]/.test(content.password)) {
           warnings.push({ field: 'password', message: 'Password contains special characters which may not be supported by all older scanners.', severity: 'warning' });
         }
+      }
+      break;
+    }
+    case 'sms': {
+      const result = smsSchema.safeParse(content);
+      handleResult(result);
+      if (result.success && content.message && content.message.length > 160) {
+        warnings.push({ field: 'message', message: 'Long SMS messages might be split or fail on some devices.', severity: 'warning' });
+      }
+      break;
+    }
+    case 'whatsapp': {
+      const result = whatsappSchema.safeParse(content);
+      handleResult(result);
+      break;
+    }
+    case 'vcard': {
+      const result = vcardSchema.safeParse(content);
+      handleResult(result);
+      if (result.success) {
+        // approximate vcard length check to warn about density
+        const len = JSON.stringify(content).length;
+        if (len > 800) {
+          warnings.push({ field: 'notes', message: 'Large vCards create dense QR codes that are harder to scan.', severity: 'warning' });
+        }
+      }
+      break;
+    }
+    case 'upi': {
+      const result = upiSchema.safeParse(content);
+      handleResult(result);
+      if (result.success && !content.isFixedAmount) {
+        warnings.push({ field: 'isFixedAmount', message: 'Payer will enter the amount manually.', severity: 'warning' });
       }
       break;
     }

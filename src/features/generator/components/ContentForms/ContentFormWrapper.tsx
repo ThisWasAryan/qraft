@@ -5,6 +5,10 @@ import { TextForm } from './TextForm';
 import { EmailForm } from './EmailForm';
 import { PhoneForm } from './PhoneForm';
 import { WiFiForm } from './WiFiForm';
+import { SMSForm } from './SMSForm';
+import { WhatsAppForm } from './WhatsAppForm';
+import { VCardForm } from './VCardForm';
+import { UPIForm } from './UPIForm';
 
 export const ContentFormWrapper: React.FC = () => {
   const type = useQRStore((state) => state.config.content.type);
@@ -16,6 +20,10 @@ export const ContentFormWrapper: React.FC = () => {
       {type === 'email' && <EmailForm />}
       {type === 'phone' && <PhoneForm />}
       {type === 'wifi' && <WiFiForm />}
+      {type === 'sms' && <SMSForm />}
+      {type === 'whatsapp' && <WhatsAppForm />}
+      {type === 'vcard' && <VCardForm />}
+      {type === 'upi' && <UPIForm />}
     </div>
   );
 };

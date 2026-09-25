@@ -5,6 +5,7 @@ import { Download, Copy, Loader2 } from 'lucide-react';
 import type { ExportFormat } from '../../../../utils/download';
 import { useQRStore } from '../../../../stores/qrStore';
 import { useToastStore } from '../../../../stores/toastStore';
+import { PayloadPreview } from './PayloadPreview';
 
 interface ExportPanelProps {
   canvas: HTMLCanvasElement | null;
@@ -72,7 +73,15 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({ canvas }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', padding: 'var(--spacing-md)' }}>
+    <div style={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      gap: 'var(--spacing-md)', 
+      padding: 'var(--spacing-md)',
+      background: 'var(--color-surface-hover)',
+      border: '1px solid var(--color-border)',
+      borderRadius: 'var(--radius-lg)'
+    }}>
       <h3 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 600 }}>Export</h3>
       
       <div style={{ display: 'flex', gap: 'var(--spacing-sm)', flexWrap: 'wrap' }}>
@@ -122,6 +131,8 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({ canvas }) => {
         <Copy size={16} />
         Copy to Clipboard
       </Button>
+
+      <PayloadPreview />
     </div>
   );
 };

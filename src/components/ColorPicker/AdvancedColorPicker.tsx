@@ -81,8 +81,8 @@ export const AdvancedColorPicker: React.FC<AdvancedColorPickerProps> = ({
 
       {mode === 'gradient' && gradient && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          <div className={styles.gradientRow}>
+            <div>
               <label style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '4px', display: 'block' }}>Type</label>
               <select 
                 value={gradient.type} 
@@ -94,28 +94,28 @@ export const AdvancedColorPicker: React.FC<AdvancedColorPickerProps> = ({
               </select>
             </div>
             {gradient.type === 'linear' && (
-              <div style={{ flex: 1, minWidth: 0 }}>
+              <div>
                 <label style={{ fontSize: '12px', color: 'var(--color-text-muted)', marginBottom: '4px', display: 'block' }}>Angle</label>
                 <input 
                   type="range" 
+                  className={styles.slider}
                   min="0" max="360" 
                   value={Math.round((gradient.rotation || 0) * (180 / Math.PI))}
                   onChange={(e) => onChange(color, { ...gradient, rotation: parseInt(e.target.value) * (Math.PI / 180) })}
-                  style={{ width: '100%' }}
                 />
               </div>
             )}
           </div>
           
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
+          <div className={styles.gradientRow}>
+            <div>
               <ColorPicker 
                 label="Start Color" 
                 color={gradient.colorStops[0].color} 
                 onChange={(c) => handleStopColorChange(0, c)} 
               />
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div>
               <ColorPicker 
                 label="End Color" 
                 color={gradient.colorStops[1].color} 
