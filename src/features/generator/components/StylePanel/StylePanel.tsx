@@ -4,12 +4,15 @@ import { EyeSection } from './sections/EyeSection';
 import { ColorSection } from './sections/ColorSection';
 import { LogoSection } from './sections/LogoSection';
 import { AdvancedSection } from './sections/AdvancedSection';
+import { PresetBrowser } from '../PresetSelector/PresetBrowser';
 import { Palette, Eye, Grid3x3, Image as ImageIcon, Settings } from 'lucide-react';
 import styles from './StylePanel.module.css';
 
 export const StylePanel: React.FC = () => {
   return (
     <div className={styles.container}>
+      <PresetBrowser />
+
       <div className={styles.sectionGroup}>
         <h3 className={styles.header}>
           <Palette size={18} className={styles.icon} /> Colors

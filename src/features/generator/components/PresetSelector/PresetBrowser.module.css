@@ -1,0 +1,198 @@
+.container {
+  margin-bottom: var(--spacing-xl);
+  width: 100%;
+  min-width: 0;
+}
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-md);
+}
+
+.title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.themeToggle {
+  display: flex;
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.themeBtn {
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  font-size: var(--font-size-xs);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.themeBtnActive {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.modifiedState {
+  text-align: right;
+}
+
+.modifiedName {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.resetBtn {
+  font-size: var(--font-size-xs);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.resetBtn:hover {
+  background: var(--color-surface-hover);
+}
+
+.categoriesScroll {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.categoriesScroll::-webkit-scrollbar {
+  height: 4px;
+}
+.categoriesScroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+.categoriesScroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.categoryBtn {
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.categoryBtnActive {
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: #FFFFFF;
+}
+
+.presetsScroll {
+  display: flex;
+  gap: var(--spacing-md);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-sm);
+  /* Ensure container doesn't force parent to expand */
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Themed scrollbar for presets */
+.presetsScroll::-webkit-scrollbar {
+  height: 8px;
+}
+.presetsScroll::-webkit-scrollbar-track {
+  background: var(--color-surface);
+  border-radius: 8px;
+}
+.presetsScroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 8px;
+}
+.presetsScroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+.presetCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-width: 160px;
+  text-align: left;
+  border: 2px solid var(--color-border);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.presetCard:hover {
+  border-color: var(--color-border-hover);
+  background-color: var(--color-surface-hover);
+}
+
+.presetCardActive {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface-hover);
+}
+
+.previewWrapper {
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--spacing-sm);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewPlaceholder {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-surface-hover);
+  border-radius: var(--radius-md);
+  opacity: 0.5;
+}
+
+.cardFooter {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.cardTitleWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.presetName {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}

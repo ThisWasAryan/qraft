@@ -7,9 +7,10 @@ import styles from './QRPreview.module.css';
 interface QRPreviewProps {
   config: QRConfig;
   debounceMs?: number;
+  isThumbnail?: boolean;
 }
 
-export const QRPreview: React.FC<QRPreviewProps> = ({ config, debounceMs = 300 }) => {
+export const QRPreview: React.FC<QRPreviewProps> = ({ config, debounceMs = 300, isThumbnail = false }) => {
   const debouncedConfig = useDebounce(config, debounceMs);
   const { canvas, isGenerating, error } = useQRCompositor(debouncedConfig);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -30,7 +31,10 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ config, debounceMs = 300 }
   };
 
   return (
-    <div className={styles.previewContainer}>
+    <div 
+      className={isThumbnail ? styles.thumbnailContainer : styles.previewContainer}
+      style={isThumbnail ? { width: '100%', height: '100%', backgroundColor: 'transparent' } : {}}
+    >
       {isGenerating && <div className={styles.loadingOverlay}>Generating...</div>}
       {error && (
         <div className={styles.errorOverlay}>
@@ -43,7 +47,7 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ config, debounceMs = 300 }
       
       <div 
         ref={containerRef} 
-        className={styles.qrWrapper} 
+        className={isThumbnail ? styles.thumbnailWrapper : styles.qrWrapper} 
         aria-label="QR Code Preview"
       />
     </div>

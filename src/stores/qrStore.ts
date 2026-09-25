@@ -6,10 +6,14 @@ import { validateQRContent } from '../domain/validators';
 import { analyzeReliability } from '../domain/reliability';
 import { generateRandomPalette } from '../domain/randomizer/generateRandomPalette';
 import { getMaxErrorCorrectionLevel } from '../utils/capacity';
+import { QR_PRESETS } from '../domain/presets/registry';
 
 interface QRState {
   config: QRConfig;
   
+  activePresetId: string | null;
+  basePresetId: string | null;
+
   // Validation state
   isContentValid: boolean;
   contentErrors: Array<{ field: string; message: string; severity: 'error' | 'warning' }>;
@@ -23,6 +27,8 @@ interface QRState {
   resetConfig: () => void;
   autoFixReliability: () => void;
   randomizeDesign: () => void;
+  applyPreset: (presetId: string) => void;
+  resetPreset: () => void;
 }
 
 // Initial content shells for fast switching
@@ -42,6 +48,8 @@ export const useQRStore = create<QRState>()(
   temporal(
     (set) => ({
       config: DEFAULT_QR_CONFIG,
+      activePresetId: null,
+      basePresetId: null,
       
       isContentValid: true,
       contentErrors: [],
@@ -107,6 +115,7 @@ export const useQRStore = create<QRState>()(
 
       setStyle: (styleUpdate) => {
         set((state) => ({
+          activePresetId: null,
           config: {
             ...state.config,
             style: {
@@ -119,6 +128,7 @@ export const useQRStore = create<QRState>()(
 
       setErrorCorrection: (level) => {
         set((state) => ({
+          activePresetId: null,
           config: {
             ...state.config,
             errorCorrection: level,
@@ -129,6 +139,8 @@ export const useQRStore = create<QRState>()(
       resetConfig: () => {
         set({
           config: DEFAULT_QR_CONFIG,
+          activePresetId: null,
+          basePresetId: null,
           isContentValid: true,
           contentErrors: [],
         });
@@ -137,6 +149,8 @@ export const useQRStore = create<QRState>()(
       loadConfig: (config) => {
         set({
           config,
+          activePresetId: null,
+          basePresetId: null,
           isContentValid: true,
           contentErrors: [],
         });
@@ -228,7 +242,7 @@ export const useQRStore = create<QRState>()(
 
           if (changed) {
             newConfig.style = newStyle;
-            return { config: newConfig };
+            return { config: newConfig, activePresetId: null };
           }
           
           return state;
@@ -239,6 +253,7 @@ export const useQRStore = create<QRState>()(
         set((state) => {
           const randomPalette = generateRandomPalette();
           return {
+            activePresetId: null,
             config: {
               ...state.config,
               errorCorrection: state.config.errorCorrection,
@@ -252,11 +267,55 @@ export const useQRStore = create<QRState>()(
             },
           };
         });
-      }
+      },
+
+      applyPreset: (presetId: string) => {
+        set((state) => {
+          const preset = QR_PRESETS.find(p => p.id === presetId);
+          if (!preset) return state;
+
+          return {
+            activePresetId: preset.id,
+            basePresetId: preset.id,
+            config: {
+              ...state.config,
+              errorCorrection: preset.errorCorrection ?? state.config.errorCorrection,
+              style: {
+                ...state.config.style,
+                ...preset.style,
+              },
+            },
+          };
+        });
+      },
+
+      resetPreset: () => {
+        set((state) => {
+          if (!state.basePresetId) return state;
+          const preset = QR_PRESETS.find(p => p.id === state.basePresetId);
+          if (!preset) return state;
+
+          return {
+            activePresetId: preset.id,
+            config: {
+              ...state.config,
+              errorCorrection: preset.errorCorrection ?? state.config.errorCorrection,
+              style: {
+                ...state.config.style,
+                ...preset.style,
+              },
+            },
+          };
+        });
+      },
     }),
     {
       limit: 50,
-      partialize: (state) => ({ config: state.config }),
+      partialize: (state) => ({ 
+        config: state.config, 
+        activePresetId: state.activePresetId, 
+        basePresetId: state.basePresetId 
+      }),
       handleSet: (handleSet) => {
         let timeout: ReturnType<typeof setTimeout>;
         return (state) => {

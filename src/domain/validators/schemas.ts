@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 
 export const urlSchema = z.object({
   type: z.literal('url'),

@@ -157,14 +157,15 @@ export interface QRConfig {
 }
 
 // === Presets ===
+export type PresetCategory = 'messaging' | 'social' | 'developer' | 'music';
+
 export interface QRPreset {
   id: string;
   name: string;
   description: string;
-  category: 'basic' | 'professional' | 'creative' | 'branded';
+  category: PresetCategory;
   style: Partial<QRStyle>;   // partial overrides
   errorCorrection?: ErrorCorrectionLevel;
-  isBuiltIn: boolean;
 }
 
 // === History ===

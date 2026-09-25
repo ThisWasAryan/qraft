@@ -1,4 +1,4 @@
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js/min';
 // Let's just redefine the payload types here or import them. Since they are in types.ts we can import from there.
 // Actually, previously encoders.ts had `EmailPayload` and `WifiPayload` locally defined.
 // Let's redefine local payload types for clarity or use the ones from types.ts directly if they match.
