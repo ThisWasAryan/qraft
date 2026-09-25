@@ -1,90 +1,494 @@
 # QRaft
 
-QRaft is a privacy-first, local-only, advanced QR code generator built with React and Vite. It provides an unlimited canvas for styling QR codes with complex gradients, custom logos, dynamic patterns, varied content types, and advanced reliability checks — executing entirely within your browser. 
+QRaft is a privacy-first QR code generator and designer built for precise control over both QR content and visual presentation.
 
-No data is sent to external servers, and no tracking is involved.
+Create QR codes for URLs, text, email, phone numbers, SMS, WhatsApp, contacts, Wi-Fi networks, and UPI payments, then customize their modules, finder patterns, colors, gradients, logos, frames, typography, margins, and error correction. QRaft also continuously analyzes designs for potential scanability issues and provides targeted recommendations and automatic fixes.
 
-## 🚀 Core Philosophy
-- **Privacy-First Architecture:** 100% client-side generation. Your data never leaves your device.
-- **Limitless Customization:** If you can imagine a QR style, you can build it.
-- **Reliability:** Beautiful QR codes shouldn't sacrifice scanability. Real-time checks keep your codes functional.
+Everything required for QR generation and customization runs locally in the browser. QR payloads are not sent to a QRaft server, and the application does not use analytics or tracking.
 
-## ✨ Expansive Feature List
+## Core Philosophy
 
-### 📝 Supported Content Types (Payloads)
-QRaft supports a vast array of specialized payloads to create highly functional QR codes.
-- **URL**: Link directly to websites or web applications.
-- **Text**: Standard plain text payloads.
-- **Email**: Pre-fill email addresses, subjects, CCs, BCCs, and body text.
-- **Phone**: Initiate phone calls immediately with normalized international number formatting.
-- **Wi-Fi**: Automatically connect to Wi-Fi networks (WPA/WEP/nopass) including hidden networks.
-- **SMS**: Pre-fill text messages to specific numbers.
-- **WhatsApp**: Launch direct WhatsApp conversations with pre-filled messages.
-- **vCard (Contact)**: Share comprehensive contact details including names, organization, job titles, multiple addresses, emails, phones, URLs, and custom notes.
-- **UPI (Unified Payments Interface)**: Create direct payment links supporting payee address, payee name, transaction notes, and fixed currency amounts.
+- **Privacy:** QR payloads are processed locally without requiring an account or sending content to a QRaft backend.
+- **Control:** Every major visual component of the QR code can be configured independently.
+- **Reliability:** Customization should not come at the cost of scanability. QRaft continuously evaluates potential reliability issues.
+- **Reversibility:** Experiment freely with undo, redo, persistent history, presets, and randomized designs.
+- **Precision:** Structured payloads, validation, capacity handling, and export controls are treated as first-class features.
 
-### 🎨 Advanced Styling Engine
-QRaft includes a deeply customizable styling engine allowing pixel-perfect control over every element of the QR code.
+## Features
 
-#### Modules (Dots)
-- **Shapes**: Choose from `square`, `dots`, `rounded`, `classy`, `classy-rounded`, or `extra-rounded`.
-- **Colors**: Solid hex colors or complex gradients.
-- **Gradients**: Linear (with custom rotation) and Radial gradients supported.
+### Supported Content Types
 
-#### Eyes (Finder Patterns)
-Separate styling for both the Eye Frame (Corner Square) and the Eye Pupil (Corner Dot).
-- **Eye Frame Shapes**: `square`, `dot`, `extra-rounded`, `dots`, `rounded`, `classy`, `classy-rounded`.
-- **Eye Pupil Shapes**: `square`, `dot`.
-- **Independent Colors**: Frame and pupil can share colors or be customized independently with solid colors or gradients.
+QRaft provides dedicated structured forms and encoders for common QR use cases:
 
-#### Backgrounds
-- **Fill**: Solid colors, transparent backgrounds, or rich gradients.
-- **Rounding**: Configurable border radius for smooth background edges.
+- **URL:** Encode websites and web applications with URL-specific validation.
+- **Text:** Encode arbitrary plain text.
+- **Email:** Create `mailto:` payloads with recipient, subject, body, CC, and BCC fields.
+- **Phone:** Encode telephone numbers with international number validation and normalization.
+- **SMS:** Create pre-filled SMS payloads with phone numbers and messages.
+- **WhatsApp:** Generate WhatsApp links containing phone numbers and pre-filled messages.
+- **Contact:** Generate structured vCard payloads containing names, organizations, job titles, contact information, addresses, websites, and notes.
+- **Wi-Fi:** Generate Wi-Fi configuration payloads supporting WPA, WEP, open networks, passwords, SSIDs, and hidden networks.
+- **UPI:** Generate UPI payment payloads with payee address, payee name, amount, currency, transaction notes, and fixed or variable payment amounts.
 
-#### Logos & Branding
-- **Logo Upload**: Add your own brand logo to the center of the QR code.
-- **Size & Margin**: Fine-tune the scale (up to 40% of the code) and the margin around the logo.
-- **Background Plates**: Optional protective plates behind the logo (circle, rounded-square, square) with customizable padding and colors.
-- **Excavation**: Toggle the visibility of QR modules hidden beneath the logo to improve aesthetics and scannability.
-- **Opacity**: Adjust logo transparency.
+Each payload type has content-specific validation rather than relying on a generic text field.
 
-#### Frames & Call To Action (CTA)
-Wrap your QR code in beautiful custom frames to drive engagement.
-- **Styles**: `none`, `simple`, `rounded`, `badge`, `banner`, or `ticket`.
-- **Customization**: Independent control over frame color, background color, border width, border radius, and padding.
-- **CTA Text**: Add dynamic text like "SCAN ME" or "VIEW MENU".
-- **Typography**: Customize fonts (e.g., Inter, JetBrains Mono), font weights, font sizes, letter spacing, text color, and alignment (top/bottom, left/center/right).
+### Advanced QR Styling
 
-### 🛠 Reliability & Error Correction
-QRaft ensures that your highly customized codes remain perfectly scannable.
-- **Dynamic Error Correction**: Adjust EC levels (L, M, Q, H) to compensate for logos or damage.
-- **Smart Reliability Engine**: 
-  - Real-time checks for contrast ratios between foreground and background.
-  - Quiet zone (margin) validation.
-  - Density checks ensuring the chosen EC level matches the payload capacity.
-- **Tiered Auto-Fix**: A smart system that automatically resolves quiet-zone and contrast issues while preserving as much of your design intent as possible. Generates a "Scan Reliability Score" as you customize.
+QRaft exposes the visual components of a QR code as independently configurable elements.
 
-### 🎲 Generative Design & Presets
-- **Design Randomizer**: Click the randomize button to let the engine mathematically generate vibrant, unique, and aesthetically pleasing design combinations on the fly.
-- **Visual Preset Browser**: A beautifully designed, horizontally scrolling preset library. Start your designs instantly by choosing from categorized templates (Messaging, Social, Developer, Music). 
-- **Adaptive Light/Dark Presets**: Presets intelligently adapt to your chosen style. Toggle between Light and Dark mode styles directly in the browser to instantly see how presets look with inverted high-contrast backgrounds and white-out logos (like the dark-mode GitHub preset).
-- **Non-Destructive Application**: Applying a preset sets up your colors, logos, and geometry, but leaves you in complete control to customize it further.
+#### Modules
 
-### ⚡ Developer Experience & UI Nuances
-- **Payload Preview**: An expandable UI panel that lets you inspect the exact raw string encoded into the QR matrix, complete with a one-click copy-to-clipboard button.
-- **Keyboard Shortcuts**: Robust shortcut support with context-aware listeners (e.g., safely disabled when typing). Quickly `Ctrl+Z` to undo and `Ctrl+Shift+Z` to redo.
-- **Strict Payload Validation**: Uses Zod schemas to rigorously validate all content forms in real-time, ensuring emails, phone numbers, and URLs are structurally correct before rendering.
-- **Theme System**: Full support for Dark Mode, Light Mode, and System Preference synchronization dynamically saved and loaded without flashing.
-- **Integrated Toast Notifications**: Non-intrusive feedback on user actions (successful exports, copied payloads, validation errors) powered by a lightweight global store.
-- **Accessible Custom UI Components**: Built from the ground up with custom, highly accessible UI primitives: Accordions, Dialogs, Sliders, Color Pickers, Badges, and Tooltips, elegantly styled with CSS Modules and a global CSS variable system.
+- Square
+- Dots
+- Rounded
+- Classy
+- Classy Rounded
+- Extra Rounded
+- Independent module colors
+- Solid colors
+- Linear gradients
+- Radial gradients
+- Configurable gradient color stops
+- Configurable linear-gradient rotation
 
-### ⏱ History & State Management
-- **Time Travel**: Features a full undo/redo stack. You can freely experiment without fear of losing your previous design iterations.
-- **Persistent History**: Your generated QR codes are automatically saved to your browser's local IndexedDB. You can view, reload, and manage your past creations across sessions.
+#### Finder Patterns
 
-### ⚡ Performance Optimization
-- **Lazy Loading & Code Splitting**: Heavy UI components like the Style Panel and History Panel are lazy-loaded dynamically using React's `Suspense` and `lazy()`. This drastically reduces the initial JavaScript bundle size, ensuring blazing fast load times and a rapid first paint.
+Finder-pattern frames and centers can be styled independently.
 
-### 💾 High-Resolution Export
-- **Formats**: Export your creations in SVG, PNG, or JPEG formats.
-- **Quality**: Supports ultra-high-resolution exports suitable for both digital use and large-format physical printing.
+**Frame shapes:**
+
+- Square
+- Dot
+- Extra Rounded
+- Dots
+- Rounded
+- Classy
+- Classy Rounded
+
+**Center shapes:**
+
+- Square
+- Dot
+
+Both components support independent colors and gradient styling.
+
+#### Background
+
+- Solid colors
+- Transparent backgrounds
+- Linear gradients
+- Radial gradients
+- Configurable background rounding
+
+#### Quiet Zone
+
+The QR margin can be configured independently, allowing control over the clear space surrounding the QR symbol.
+
+### Logo Support
+
+QRaft supports placing custom images inside the QR code.
+
+- PNG, JPEG, and SVG logo support
+- Adjustable logo size
+- Adjustable logo margin
+- Adjustable logo opacity
+- Optional module excavation beneath the logo
+- Optional logo background plate
+- Circle, rounded-square, and square logo plates
+- Independent plate color
+- Configurable plate padding
+
+Logo configuration is incorporated into the reliability analysis and error-correction logic.
+
+### Frames and Call-to-Action Text
+
+QR codes can be wrapped in custom presentation frames without altering the underlying payload.
+
+Supported frame styles:
+
+- None
+- Simple
+- Rounded
+- Badge
+- Banner
+- Ticket
+
+Frame configuration includes:
+
+- Border color
+- Background color
+- Border width
+- Border radius
+- Padding
+
+Frames can optionally include call-to-action text such as `SCAN ME`, `VIEW MENU`, or `PAY HERE`.
+
+CTA controls include:
+
+- Text
+- Top or bottom positioning
+- Font family
+- Font weight
+- Font size
+- Letter spacing
+- Text color
+- Left, center, or right alignment
+
+### Error Correction and Capacity
+
+QRaft supports all standard QR error-correction levels:
+
+- **L**
+- **M**
+- **Q**
+- **H**
+
+The application evaluates payload capacity when determining which correction levels are viable for the current content.
+
+This prevents users from selecting correction configurations that cannot accommodate the encoded payload.
+
+Error correction is also considered when evaluating customized modules, finder patterns, and logos.
+
+### Scan Reliability Analysis
+
+QRaft includes a heuristic reliability engine that continuously evaluates the current QR configuration.
+
+The analyzer checks:
+
+- Foreground/background contrast
+- Finder-pattern contrast
+- Quiet-zone size
+- Error-correction level
+- Logo size
+- Module shape
+- Finder-pattern shape
+- Output size
+- Gradient contrast
+- Payload density
+
+Each check is classified as:
+
+- Good
+- Warning
+- Danger
+
+Individual checks provide contextual information and recommendations rather than presenting only a single opaque result.
+
+The reliability analysis is heuristic and cannot guarantee successful scanning under every real-world condition such as poor lighting, damaged prints, camera limitations, reflections, or extreme physical sizes.
+
+### Automatic Reliability Fixes
+
+QRaft provides an automatic issue-fixing system designed to resolve reliability problems while preserving the existing design wherever practical.
+
+Depending on the detected issues, the fixer can adjust:
+
+- Foreground/background contrast
+- Finder-pattern colors
+- Quiet-zone margin
+- Frame padding
+- Error correction
+- Logo size
+- Module shape
+- Finder-pattern shape
+- Output dimensions
+
+The fixing process uses a tiered approach rather than immediately replacing the entire design with a default configuration.
+
+After changes are applied, the resulting configuration is analyzed again.
+
+### Design Randomizer
+
+QRaft includes a design randomizer backed by curated design palettes.
+
+Randomization can modify combinations of:
+
+- Module styling
+- Pattern colors
+- Finder-pattern styling
+- Background colors
+- Error-correction configuration
+
+This allows users to explore different visual directions without manually configuring every property.
+
+### Presets
+
+QRaft includes built-in visual presets organized into categorized templates (Messaging, Social, Developer, Music). 
+
+- **Visual Preset Browser**: A beautifully designed, horizontally scrolling preset library. Start your designs instantly by exploring available templates.
+- **Adaptive Light/Dark Variants**: Presets intelligently adapt to your chosen application theme. Toggle between Light and Dark mode styles directly in the browser to instantly see how presets look with inverted high-contrast backgrounds and white-out SVG logos (like the dark-mode GitHub preset).
+- **Non-Destructive Application**: Applying a preset changes the design configuration (colors, logos, geometry, and error-correction) while keeping your actual QR payload content entirely separate and untouched. It leaves you in complete control to customize it further.
+
+### Payload Preview
+
+The encoded QR payload can be inspected through an expandable payload viewer.
+
+This allows users to verify the exact string being encoded rather than relying only on the visual QR representation.
+
+The payload can also be copied directly to the clipboard.
+
+### Undo and Redo
+
+QRaft maintains temporal configuration history for non-destructive editing.
+
+Users can move backward and forward through design changes using:
+
+- Undo
+- Redo
+- `Ctrl + Z`
+- `Ctrl + Shift + Z`
+
+Keyboard handling is context-aware so editing shortcuts do not interfere with normal text input.
+
+### Persistent History
+
+Exported and copied QR configurations are stored in persistent browser storage.
+
+History entries contain the QR configuration itself rather than only an exported image, allowing previous designs to be restored and edited again.
+
+History supports:
+
+- Loading previous configurations
+- Automatic labels
+- Timestamps
+- Individual deletion
+- Clearing all history
+- Persistence across refreshes and browser sessions
+
+History is backed by IndexedDB.
+
+### Export
+
+QRaft supports multiple export formats:
+
+- PNG
+- JPEG
+- WEBP
+- SVG
+
+SVG exports are generated from the QR configuration and can include QRaft frame and CTA composition.
+
+Generated QR images can also be copied directly to the clipboard.
+
+Successful exports and clipboard operations are recorded in history.
+
+### Input Validation
+
+QRaft uses structured validation for its content forms.
+
+Validation is performed continuously as payload data changes and distinguishes between errors and warnings.
+
+Validation covers content-specific requirements such as:
+
+- URL structure
+- Email addresses
+- Phone numbers
+- Wi-Fi configuration
+- UPI information
+- Contact fields
+- Payload length
+- Payload capacity
+
+### Theme System
+
+QRaft supports:
+
+- Light theme
+- Dark theme
+- System preference
+
+Theme preferences are persisted locally and restored when the application is reopened.
+
+### Toast Notifications
+
+A lightweight notification system provides contextual feedback for actions such as:
+
+- Successful exports
+- Clipboard operations
+- Validation failures
+- Configuration changes
+- Other application events
+
+### Custom UI System
+
+The interface uses reusable custom UI primitives including:
+
+- Accordions
+- Badges
+- Buttons
+- Cards
+- Color pickers
+- Dialogs
+- Inputs
+- Select controls
+- Sliders
+- Tooltips
+- Loading states
+
+The components share a centralized CSS-variable-based design system for consistent spacing, typography, surfaces, borders, colors, and interaction states.
+
+### Responsive Preview
+
+The QR preview is derived directly from the active configuration and updates as content or styling changes.
+
+Changes to payload, colors, shapes, gradients, error correction, logos, frames, margins, and output size are reflected in the preview without requiring a separate manual generation step.
+
+### Density Analysis
+
+QRaft analyzes encoded payload size to identify dense QR configurations.
+
+Large payloads can produce denser QR matrices with smaller individual modules, so the system surfaces density warnings and recommendations when appropriate.
+
+### Performance
+
+QRaft uses lazy loading and code splitting for heavier application areas.
+
+Large UI sections such as the Style Panel and History Panel can be loaded independently, reducing the initial application payload while retaining the full editing experience.
+
+## Privacy
+
+QRaft follows a local-first architecture.
+
+QR payloads are processed inside the browser rather than being submitted to a QRaft backend.
+
+This is particularly important for payloads containing sensitive information such as:
+
+- Wi-Fi passwords
+- Contact information
+- Phone numbers
+- Email addresses
+- Private text
+- UPI payment information
+
+No QRaft account is required, and the application does not include an analytics or tracking layer.
+
+## Architecture
+
+QRaft separates QR-specific domain logic from application state, rendering, persistence, and interface components.
+
+```text
+src/
+├── components/
+│   ├── Accordion/
+│   ├── Badge/
+│   ├── Button/
+│   ├── Card/
+│   ├── ColorPicker/
+│   ├── Dialog/
+│   ├── Input/
+│   ├── Layout/
+│   ├── Loading/
+│   ├── Select/
+│   ├── Slider/
+│   └── ...
+│
+├── domain/
+│   ├── encoders/
+│   ├── presets/
+│   ├── randomizer/
+│   ├── reliability/
+│   ├── validators/
+│   └── types.ts
+│
+├── features/
+│   └── generator/
+│       ├── components/
+│       │   ├── ContentForms/
+│       │   ├── ExportPanel/
+│       │   ├── HistoryPanel/
+│       │   ├── PresetSelector/
+│       │   ├── ReliabilityIndicator/
+│       │   ├── StylePanel/
+│       │   └── QRPreview.tsx
+│       └── hooks/
+│
+├── lib/
+│   ├── compositor.ts
+│   ├── fontLoader.ts
+│   ├── logoProcessor.ts
+│   ├── qrCodeStyling.ts
+│   └── storage.ts
+│
+├── pages/
+├── stores/
+├── styles/
+└── utils/
+```
+The project is organized into focused layers that keep QR logic, application state, rendering, persistence, and interface concerns separate.
+
+The domain layer handles QR-specific logic including payload encoding, validation, reliability analysis, presets, and design randomization.
+
+The feature layer contains the generator workflow, editor components, previews, panels, and feature-specific hooks.
+
+The library layer provides the underlying QR rendering, logo processing, composition, font handling, and browser storage utilities.
+
+Application state is managed through dedicated stores for QR configuration, history, theme, and notifications, keeping transient UI state separate from persistent QR data.
+
+## Technology
+
+### Core
+
+- React
+- TypeScript
+- Vite
+
+### State & Persistence
+
+- Zustand
+- Zundo
+- IndexedDB
+- `idb-keyval`
+
+### QR & Data
+
+- `qr-code-styling`
+- Zod
+- `libphonenumber-js`
+
+### Interface
+
+- Lucide React
+- CSS Modules
+- Custom CSS variable design system
+
+### Testing & Tooling
+
+- Vitest
+- React Testing Library
+- Playwright
+- Oxlint
+- Prettier
+
+## Documentation
+
+QRaft includes an extensive documentation set covering both the product requirements and implementation details.
+
+Documentation covers:
+
+- Architecture
+- Requirements
+- Data model
+- QR encoding
+- Payload validation
+- Scan reliability
+- Automatic reliability fixes
+- Export pipeline
+- Persistent history
+- Presets
+- Design randomization
+- Accessibility
+- Performance
+- Security
+- Testing
+- UI/UX
+- Design system
+- Implementation decisions
+
+## Why QRaft?
+
+QRaft is built around the idea that generating a QR code should not end with producing a matrix.
+
+A QR code can contain structured data, have a carefully designed visual identity, introduce scanability risks, and require multiple iterations before it is ready to use.
+
+QRaft brings those concerns into one workflow.
+
+Create the payload, shape the design, inspect exactly what is being encoded, experiment freely, analyze the result for potential reliability issues, automatically correct problems when possible, and export the finished QR code — all while keeping the underlying data local to the browser.
