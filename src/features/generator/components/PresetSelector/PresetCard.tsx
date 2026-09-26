@@ -11,7 +11,7 @@ interface PresetCardProps {
   index: number;
 }
 
-const PREVIEW_PAYLOAD = 'https://qraft.app/preset-preview';
+const PREVIEW_PAYLOAD = 'https://thiswasaryan.in';
 
 export const PresetCard: React.FC<PresetCardProps> = ({ preset, isActive, onApply, index }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -36,19 +36,15 @@ export const PresetCard: React.FC<PresetCardProps> = ({ preset, isActive, onAppl
   }, [index]);
 
   const previewConfig: QRConfig = useMemo(() => {
-    const originalMargin = preset.style.margin ?? DEFAULT_QR_CONFIG.style.margin ?? 0;
-    const scale = 120 / 1000;
-    const scaledMargin = Math.round(originalMargin * scale);
-
     return {
       content: { type: 'url', url: PREVIEW_PAYLOAD },
       errorCorrection: preset.errorCorrection ?? 'H',
       style: {
         ...DEFAULT_QR_CONFIG.style,
         ...preset.style,
-        width: 120,
-        height: 120,
-        margin: scaledMargin,
+        width: 300,
+        height: 300,
+        margin: 15,
       },
     };
   }, [preset.errorCorrection, preset.style]);

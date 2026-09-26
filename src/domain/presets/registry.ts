@@ -22,20 +22,6 @@ export const PRESET_LOGOS = {
 
 export const QR_PRESETS: QRPreset[] = [
   {
-    id: 'default',
-    name: 'Default',
-    description: 'A standard, high-contrast black and white QR code design.',
-    category: 'standard',
-    errorCorrection: 'Q',
-    style: {
-      margin: 40,
-      dotOptions: { type: 'square', color: '#000000' },
-      cornerSquareOptions: { type: 'square', color: '#000000' },
-      cornerDotOptions: { type: 'square', color: '#000000' },
-      backgroundOptions: { color: '#FFFFFF' },
-    },
-  },
-  {
     id: 'whatsapp-classic',
     name: 'WhatsApp',
     description: 'A classic WhatsApp-inspired QR design with familiar green tones, rounded geometry, and a clean white logo knockout.',
@@ -301,6 +287,21 @@ export const QR_PRESETS: QRPreset[] = [
           padding: 8,
         },
       },
+    },
+  },
+  {
+    id: 'default',
+    name: 'Default',
+    description: 'A standard, high-contrast black and white QR code design.',
+    category: 'standard',
+    errorCorrection: 'Q',
+    style: {
+      margin: 40,
+      dotOptions: { type: 'square', color: '#000000' },
+      cornerSquareOptions: { type: 'square', color: '#000000' },
+      cornerDotOptions: { type: 'square', color: '#000000' },
+      backgroundOptions: { color: '#FFFFFF' },
+      logo: undefined,
     },
   },
 ];

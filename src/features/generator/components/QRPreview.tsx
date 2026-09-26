@@ -35,7 +35,7 @@ export const QRPreview: React.FC<QRPreviewProps> = ({ config, debounceMs = 300, 
       className={isThumbnail ? styles.thumbnailContainer : styles.previewContainer}
       style={isThumbnail ? { width: '100%', height: '100%', backgroundColor: 'transparent' } : {}}
     >
-      {isGenerating && <div className={styles.loadingOverlay}>Generating...</div>}
+      {isGenerating && <div className={styles.loadingOverlay}>{isThumbnail ? 'Loading...' : 'Generating...'}</div>}
       {error && (
         <div className={styles.errorOverlay}>
           <div style={{ fontWeight: 600, marginBottom: 'var(--spacing-xs)' }}>Error generating QR Code</div>
