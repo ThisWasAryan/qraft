@@ -141,8 +141,11 @@ const Plaque = ({ href, icon: Icon, label, delay, hoverColor }: { href: string, 
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
-        <Icon size={16} color={isHovered ? hoverColor : 'currentColor'} style={{ transition: 'color 0.3s ease' }} /> 
-        <span className={styles.linkText}>{label}</span>
+        <div className={styles.plaqueGlass} />
+        <div className={styles.plaqueContent}>
+          <Icon size={16} color={isHovered ? hoverColor : 'currentColor'} style={{ transition: 'color 0.3s ease' }} /> 
+          <span className={styles.linkText}>{label}</span>
+        </div>
       </a>
     </div>
   );

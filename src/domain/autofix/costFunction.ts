@@ -12,10 +12,10 @@ export interface ComponentCostWeights {
 }
 
 export const DEFAULT_COST_WEIGHTS: ComponentCostWeights = {
-  background: 2.0,
-  pattern: 1.0,
-  eyeFrame: 1.0,
-  eyeCenter: 0.8,
+  background: 0.5,
+  pattern: 2.0,
+  eyeFrame: 2.0,
+  eyeCenter: 1.5,
 };
 
 /**
@@ -50,5 +50,19 @@ export function colorChangeCost(original: OKLCH, adjusted: OKLCH): number {
   // When chroma is ~0 (gray), hue cost vanishes naturally
   const chromaWeight = (original.C + adjusted.C) / 2;
 
-  return dL * dL + dC * dC + chromaWeight * dH * dH;
+  // Asymmetric penalty: if we lose chroma (turn grey), penalize heavily
+  // If we gain chroma (which rarely happens in gamut clamp but is possible), normal cost
+  const chromaPenalty = dC < 0 ? 5.0 : 1.0;
+
+  let baseCost = dL * dL + (dC * dC * chromaPenalty) + (chromaWeight * dH * dH);
+
+  // DEATH PENALTY: If the original color had noticeable saturation (C >= 0.02)
+  // but the adjusted color is essentially washed out to grayscale/white/black (C < 0.01),
+  // apply a massive flat penalty. This prevents the solver from taking the "easy way out"
+  // of just blowing colors out to #ffffff or #000000 when they are very light/dark.
+  if (original.C >= 0.02 && adjusted.C < 0.01) {
+    baseCost += 2.0;
+  }
+
+  return baseCost;
 }

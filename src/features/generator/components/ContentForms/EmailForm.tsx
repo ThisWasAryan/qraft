@@ -67,7 +67,7 @@ export const EmailForm: React.FC = () => {
         />
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--spacing-md)' }}>
         <Input
           label="CC (Optional)"
           placeholder="cc@example.com"

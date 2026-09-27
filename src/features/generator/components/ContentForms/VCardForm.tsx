@@ -25,7 +25,7 @@ export const VCardForm: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-      <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--spacing-md)' }}>
         <Input
           label="First Name"
           placeholder="John"
@@ -46,7 +46,7 @@ export const VCardForm: React.FC = () => {
         />
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--spacing-md)' }}>
         <Input
           label="Organization"
           placeholder="Acme Corp"
@@ -63,7 +63,7 @@ export const VCardForm: React.FC = () => {
         />
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--spacing-md)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--spacing-md)' }}>
         <Input
           label="Phone Number"
           placeholder="+1 234 567 8900"
@@ -98,7 +98,7 @@ export const VCardForm: React.FC = () => {
 
       <div style={{ padding: 'var(--spacing-sm)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)' }}>
         <h4 style={{ margin: '0 0 var(--spacing-sm) 0', fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>Address</h4>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 'var(--spacing-sm)' }}>
           <Input
             label="Street"
             placeholder="123 Main St"
@@ -106,7 +106,7 @@ export const VCardForm: React.FC = () => {
             onChange={(e) => setContent({ street: e.target.value })}
             fullWidth
           />
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--spacing-sm)' }}>
             <Input
               label="City"
               placeholder="New York"
@@ -122,7 +122,7 @@ export const VCardForm: React.FC = () => {
               fullWidth
             />
           </div>
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: 'var(--spacing-sm)' }}>
             <Input
               label="Zip/Postal Code"
               placeholder="10001"

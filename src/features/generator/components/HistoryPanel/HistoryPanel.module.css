@@ -1,0 +1,208 @@
+.container {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+}
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  color: var(--color-error);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.clearAllBtn:hover {
+  background-color: var(--color-error-light);
+}
+
+.emptyState {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  color: var(--color-text-muted);
+}
+
+.emptyIcon {
+  margin: 0 auto var(--spacing-sm);
+  opacity: 0.5;
+}
+
+.emptyText {
+  margin: 0;
+}
+
+.emptySubtext {
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.item {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  gap: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.item:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.itemContent {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1 1 150px;
+  min-width: 0; /* Ensures truncation works */
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0; /* Important for truncation */
+}
+
+.labelWrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-weight: 500;
+  font-size: var(--font-size-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+
+.labelInput {
+  font-weight: 500;
+  font-size: var(--font-size-md);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--spacing-xs);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  width: 100%;
+  outline: none;
+}
+
+.date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--color-surface-hover);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.secondaryAction {
+  width: 0;
+  padding: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-left: -2px; /* Offset gap */
+  pointer-events: none;
+}
+
+.actionGroup:hover .secondaryAction {
+  width: 32px;
+  opacity: 1;
+  margin-left: 0;
+  pointer-events: auto;
+}
+
+.actionBtn:hover {
+  background-color: var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.actionBtn.delete:hover {
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+}
+
+/* Ensure actions are visible on touch devices */
+@media (hover: none), (pointer: coarse) {
+  .secondaryAction {
+    width: 32px;
+    opacity: 1;
+    margin-left: 0;
+    pointer-events: auto;
+  }
+}

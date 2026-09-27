@@ -223,10 +223,7 @@
 }
 
 .linkPlaque {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  position: relative;
   padding: var(--space-3) var(--space-5);
   border-radius: 9999px;
   display: flex;
@@ -236,25 +233,48 @@
   color: var(--color-text-secondary);
   font-weight: var(--font-weight-medium);
   transform: translateY(0) scale(1) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-  transition: transform 0.1s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.1s ease, color 0.3s ease;
   transform-style: preserve-3d;
 }
 
-.exploded .linkPlaque {
+.plaqueGlass {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: inherit;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 0;
+}
+
+.plaqueContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  transform: translateZ(20px);
+  z-index: 1;
+}
+
+.exploded .plaqueGlass {
   border-color: rgba(139, 92, 246, 0.2);
   background: rgba(255, 255, 255, 0.04);
 }
 
 .linkPlaque:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
   color: var(--color-text-primary);
   transform: translateY(-5px) scale(1.05) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+}
+
+.linkPlaque:hover .plaqueGlass {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2), 0 0 15px rgba(255, 255, 255, 0.05);
 }
 
-.exploded .linkPlaque:hover {
+.exploded .linkPlaque:hover .plaqueGlass {
   border-color: rgba(236, 72, 153, 0.5);
   box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 25px rgba(236, 72, 153, 0.2), 0 0 40px rgba(139, 92, 246, 0.2);
 }
@@ -262,7 +282,6 @@
 .linkText {
   font-size: var(--font-sm);
   letter-spacing: 0.02em;
-  transform: translateZ(20px); 
 }
 
 @keyframes float {

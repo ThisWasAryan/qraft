@@ -6,6 +6,7 @@ import type { QRHistoryItem, QRConfig } from '../domain/types';
 interface HistoryState {
   items: QRHistoryItem[];
   saveConfig: (config: QRConfig, presetId?: string) => void;
+  updateItemLabel: (id: string, newLabel: string) => void;
   deleteItem: (id: string) => void;
   clearAll: () => void;
 }
@@ -14,11 +15,15 @@ const HISTORY_LIMIT = 50;
 
 function generateLabel(config: QRConfig): string {
   switch (config.content.type) {
-    case 'url': return config.content.url;
-    case 'text': return config.content.text.substring(0, 30) + (config.content.text.length > 30 ? '...' : '');
-    case 'email': return `Email: ${config.content.to}`;
-    case 'phone': return `Phone: ${config.content.number}`;
-    case 'wifi': return `WiFi: ${config.content.ssid}`;
+    case 'url': return config.content.url || 'URL';
+    case 'text': return config.content.text ? (config.content.text.substring(0, 30) + (config.content.text.length > 30 ? '...' : '')) : 'Text';
+    case 'email': return config.content.to || 'Email';
+    case 'phone': return config.content.number || 'Phone';
+    case 'wifi': return config.content.ssid || 'WiFi';
+    case 'sms': return config.content.number || 'SMS';
+    case 'whatsapp': return config.content.number || 'WhatsApp';
+    case 'vcard': return config.content.firstName || config.content.lastName ? `${config.content.firstName} ${config.content.lastName}`.trim() : 'Contact';
+    case 'upi': return config.content.payeeName || config.content.payeeAddress || 'UPI';
     default: return 'QR Code';
   }
 }
@@ -43,6 +48,12 @@ export const useHistoryStore = create<HistoryState>()(
         
         return { items: newItems };
       }),
+      
+      updateItemLabel: (id, newLabel) => set((state) => ({
+        items: state.items.map(item => 
+          item.id === id ? { ...item, label: newLabel } : item
+        )
+      })),
       
       deleteItem: (id) => set((state) => ({
         items: state.items.filter(item => item.id !== id)

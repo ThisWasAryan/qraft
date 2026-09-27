@@ -35,7 +35,10 @@ function computeTargetLuminances(bgLum: number, targetRatio: number): { darker: 
 /**
  * Get the relative luminance of a hex color.
  */
-function hexLuminance(hex: string): number {
+/**
+ * Get the relative luminance of a hex color.
+ */
+export function hexLuminance(hex: string): number {
   const [r, g, b] = hexToRgb(hex);
   return getRelativeLuminance(r, g, b);
 }
@@ -49,29 +52,10 @@ function oklchLuminance(lch: OKLCH): number {
 }
 
 /**
- * Newton/weighted-least-norm solver: find the minimum-cost OKLCH adjustment
- * that reaches a specific target luminance.
- *
- * Strategy:
- * - Start from the original OKLCH color
- * - Estimate how L, C, H each affect sRGB luminance (numerical Jacobian)
- * - Take a weighted step that distributes the fix across dimensions
- * - Gamut-clamp after each step
- * - If Jacobian is near-singular (gamut edge), fall back to 1D bisection on L
- *
- * Returns the adjusted OKLCH color, or null if the target is unreachable.
- */
-
-/**
- * Compute numerical partial derivative of luminance w.r.t. an OKLCH component.
- */
-
-
-/**
  * 1D bisection fallback: find the lightness that achieves the target luminance,
  * preserving hue and reducing chroma as needed for gamut.
  */
-function bisectionFallback(original: OKLCH, targetLum: number): OKLCH | null {
+export function bisectionFallback(original: OKLCH, targetLum: number): OKLCH | null {
   let lo = 0;
   let hi = 1;
 
@@ -106,6 +90,65 @@ export interface SolidSolverResult {
   achievedContrast: number;
 }
 
+export interface SymmetricSolverResult {
+  hex1: string;
+  oklch1: OKLCH;
+  hex2: string;
+  oklch2: OKLCH;
+  achievedContrast: number;
+}
+
+/**
+ * Find all valid color adjustments to achieve at least `targetRatio`
+ * contrast against `bgHex` (both darker and lighter, if possible).
+ */
+export function solveSolidContrastCandidates(
+  fgHex: string,
+  bgHex: string,
+  targetRatio: number,
+): SolidSolverResult[] {
+  const currentRatio = getContrastRatio(fgHex, bgHex);
+  if (currentRatio >= targetRatio) {
+    return [{
+      hex: fgHex,
+      oklch: hexToOklch(fgHex),
+      cost: 0,
+      achievedContrast: currentRatio,
+    }];
+  }
+
+  const bgLum = hexLuminance(bgHex);
+  if (isForegroundInfeasible(bgLum, targetRatio)) {
+    return [];
+  }
+
+  const originalOklch = hexToOklch(fgHex);
+  const targets = computeTargetLuminances(bgLum, targetRatio);
+  const results: SolidSolverResult[] = [];
+
+  for (const targetLum of [targets.darker, targets.lighter]) {
+    if (targetLum < 0 || targetLum > 1) continue;
+
+    const solved = bisectionFallback(originalOklch, targetLum);
+    if (!solved) continue;
+
+    const solvedHex = oklchToHex(solved.L, solved.C, solved.H);
+    const achievedContrast = getContrastRatio(solvedHex, bgHex);
+
+    if (achievedContrast < targetRatio - 0.1) continue;
+
+    const cost = colorChangeCost(originalOklch, solved);
+    results.push({
+      hex: solvedHex,
+      oklch: solved,
+      cost,
+      achievedContrast,
+    });
+  }
+
+  return results;
+}
+
 /**
  * Find the minimum-cost color adjustment to achieve at least `targetRatio`
  * contrast against `bgHex`.
@@ -117,54 +160,86 @@ export function solveSolidContrast(
   bgHex: string,
   targetRatio: number,
 ): SolidSolverResult | null {
-  const currentRatio = getContrastRatio(fgHex, bgHex);
+  const candidates = solveSolidContrastCandidates(fgHex, bgHex, targetRatio);
+  if (candidates.length === 0) return null;
+
+  let bestResult = candidates[0];
+  for (let i = 1; i < candidates.length; i++) {
+    if (candidates[i].cost < bestResult.cost) {
+      bestResult = candidates[i];
+    }
+  }
+  return bestResult;
+}
+
+/**
+ * Symmetrically adjust both colors away from their geometric mean luminance.
+ * This preserves chroma for both by preventing either from hitting extreme lightness values.
+ */
+export function solveSymmetricContrast(
+  hex1: string,
+  hex2: string,
+  targetRatio: number,
+): SymmetricSolverResult | null {
+  const currentRatio = getContrastRatio(hex1, hex2);
   if (currentRatio >= targetRatio) {
-    // Already sufficient
     return {
-      hex: fgHex,
-      oklch: hexToOklch(fgHex),
-      cost: 0,
+      hex1, oklch1: hexToOklch(hex1),
+      hex2, oklch2: hexToOklch(hex2),
       achievedContrast: currentRatio,
     };
   }
 
-  const bgLum = hexLuminance(bgHex);
+  const y1 = hexLuminance(hex1);
+  const y2 = hexLuminance(hex2);
 
-  // O(1) infeasibility check
-  if (isForegroundInfeasible(bgLum, targetRatio)) {
-    return null;
+  const M = Math.sqrt((y1 + 0.05) * (y2 + 0.05));
+  const is1Lighter = y1 > y2;
+
+  let yLighterTarget = M * Math.sqrt(targetRatio) - 0.05;
+  let yDarkerTarget = M / Math.sqrt(targetRatio) - 0.05;
+
+  if (yLighterTarget > 1) {
+    yLighterTarget = 1;
+    yDarkerTarget = (1 + 0.05) / targetRatio - 0.05;
+  } else if (yLighterTarget < 0) {
+    yLighterTarget = 0;
+    yDarkerTarget = 0;
   }
 
-  const originalOklch = hexToOklch(fgHex);
-  const targets = computeTargetLuminances(bgLum, targetRatio);
-
-  let bestResult: SolidSolverResult | null = null;
-
-  // Try both directions: make fg darker, make fg lighter
-  for (const targetLum of [targets.darker, targets.lighter]) {
-    if (targetLum < 0 || targetLum > 1) continue;
-
-    const solved = bisectionFallback(originalOklch, targetLum);
-    if (!solved) continue;
-
-    const solvedHex = oklchToHex(solved.L, solved.C, solved.H);
-    const achievedContrast = getContrastRatio(solvedHex, bgHex);
-
-    // Must actually achieve the target (accounting for quantization)
-    if (achievedContrast < targetRatio - 0.1) continue;
-
-    const cost = colorChangeCost(originalOklch, solved);
-
-    if (!bestResult || cost < bestResult.cost) {
-      bestResult = {
-        hex: solvedHex,
-        oklch: solved,
-        cost,
-        achievedContrast,
-      };
-    }
+  if (yDarkerTarget < 0) {
+    yDarkerTarget = 0;
+    yLighterTarget = targetRatio * (0 + 0.05) - 0.05;
+  } else if (yDarkerTarget > 1) {
+    yDarkerTarget = 1;
+    yLighterTarget = 1;
   }
 
-  return bestResult;
+  if (yLighterTarget > 1 || yDarkerTarget < 0) return null;
+
+  const y1Target = is1Lighter ? yLighterTarget : yDarkerTarget;
+  const y2Target = is1Lighter ? yDarkerTarget : yLighterTarget;
+
+  const oklch1 = hexToOklch(hex1);
+  const solved1 = bisectionFallback(oklch1, y1Target);
+  
+  const oklch2 = hexToOklch(hex2);
+  const solved2 = bisectionFallback(oklch2, y2Target);
+
+  if (!solved1 || !solved2) return null;
+
+  const outHex1 = oklchToHex(solved1.L, solved1.C, solved1.H);
+  const outHex2 = oklchToHex(solved2.L, solved2.C, solved2.H);
+
+  const achievedContrast = getContrastRatio(outHex1, outHex2);
+  if (achievedContrast < targetRatio - 0.1) return null;
+
+  return {
+    hex1: outHex1,
+    oklch1: solved1,
+    hex2: outHex2,
+    oklch2: solved2,
+    achievedContrast
+  };
 }
 

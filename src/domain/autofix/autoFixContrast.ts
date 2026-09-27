@@ -1,11 +1,11 @@
 import type { QRConfig, QRStyle, QRGradient } from '../types';
 import { getContrastRatio, getWorstCaseContrast } from '../../utils/color';
-import { solveSolidContrast, isForegroundInfeasible } from './solidSolver';
+import { solveSolidContrast, isForegroundInfeasible, solveSymmetricContrast, solveSolidContrastCandidates } from './solidSolver';
 import { fixGradientContrast } from './gradientSolver';
 import { hexToOklch } from './colorConversion';
-import { colorChangeCost } from './costFunction';
-import type { ComponentCostWeights } from './costFunction';
+import { colorChangeCost, DEFAULT_COST_WEIGHTS } from './costFunction';
 import { validateFixResult } from './validator';
+import type { ComponentCostWeights } from './costFunction';
 import { hexToRgb, getRelativeLuminance } from '../../utils/color';
 
 // ── Public Types ──────────────────────────────────────────────────────────
@@ -35,7 +35,6 @@ export type AutoFixResult =
 
 const DEFAULT_PATTERN_TARGET = 4.6;
 const DEFAULT_EYE_TARGET = 4.6;
-const MAX_BACKGROUND_RIPPLE_PASSES = 2;
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -148,6 +147,7 @@ export function autoFixContrast(
   const patternTarget = options?.patternContrastTarget ?? DEFAULT_PATTERN_TARGET;
   const eyeTarget = options?.eyeContrastTarget ?? DEFAULT_EYE_TARGET;
   const bg = config.style.backgroundOptions.color;
+  const weights = { ...DEFAULT_COST_WEIGHTS, ...options?.costWeights };
 
   // ── Transparent background: structured failure ──
   if (bg.toLowerCase() === 'transparent') {
@@ -158,76 +158,65 @@ export function autoFixContrast(
     };
   }
 
-  // ── Build working copy ──
-  const patch: Partial<QRStyle> = {};
-  const diagnostics: FixDiagnostic[] = [];
+  type Strategy = 'fg-first' | 'symmetric' | { type: 'bg-candidate'; bgHex: string };
+  const executeStrategy = (strategy: Strategy): { cost: number; patch: Partial<QRStyle>; diagnostics: FixDiagnostic[] } | null => {
+    const patch: Partial<QRStyle> = {};
+    const diagnostics: FixDiagnostic[] = [];
+    let currentStyle: QRStyle = { ...config.style };
 
-  // Track current state of each component as we fix things
-  let currentStyle: QRStyle = { ...config.style };
+    if (strategy === 'symmetric') {
+      const bgCol = currentStyle.backgroundOptions.color;
+      const fgCol = currentStyle.dotOptions.color;
+      const hasBgGradient = !!currentStyle.backgroundOptions.gradient;
+      const hasFgGradient = !!currentStyle.dotOptions.gradient;
+      
+      if (!hasBgGradient && !hasFgGradient) {
+        const maxTarget = Math.max(patternTarget, eyeTarget);
+        const symResult = solveSymmetricContrast(bgCol, fgCol, maxTarget);
+        if (symResult) {
+          const newBgOptions = { ...currentStyle.backgroundOptions, color: symResult.hex1, gradient: undefined };
+          const diag = computeDiagnostic('background', 'background adjustment (symmetric)', bgCol, symResult.hex1, fgCol);
+          diagnostics.push(diag);
+          currentStyle.backgroundOptions = newBgOptions;
+          patch.backgroundOptions = newBgOptions;
+        } else {
+          return null; // Symmetric solve failed
+        }
+      } else {
+        return null; // Can't do symmetric on gradients right now
+      }
+    } else if (typeof strategy === 'object' && strategy.type === 'bg-candidate') {
+      const originalBg = config.style.backgroundOptions.color;
+      const patternColor = currentStyle.dotOptions.color;
+      const newBg = strategy.bgHex;
 
-  // ── Phase 1: Try fixing all foreground elements with background frozen ──
-  let bgMustMove = false;
-  const unfixableFgRelationships: string[] = [];
+      const newDiag = computeDiagnostic('background', 'background adjustment', originalBg, newBg, patternColor);
+      diagnostics.push(newDiag);
 
-  const relationships = buildRelationships(currentStyle, patternTarget, eyeTarget);
-
-  for (const rel of relationships) {
-    const contrast = getContrastForRelationship(rel);
-    if (contrast >= rel.target || contrast === -1) continue;
-
-    // O(1) infeasibility check for solid colors
-    const bgLum = hexLum(rel.bgColor);
-    const hasGradient = !!rel.fgGradient;
-
-    if (!hasGradient && isForegroundInfeasible(bgLum, rel.target)) {
-      unfixableFgRelationships.push(rel.id);
-      bgMustMove = true;
-      continue;
-    }
-
-    // Try solving foreground
-    const fixResult = hasGradient
-      ? fixGradientContrast(rel.fgColor, rel.fgGradient, rel.bgColor, rel.bgGradient, rel.target)
-      : (() => {
-          const solidResult = solveSolidContrast(rel.fgColor, rel.bgColor, rel.target);
-          if (!solidResult) return null;
-          return { adjustedSolidColor: solidResult.hex, adjustedGradient: undefined as unknown as QRGradient, achievedContrast: solidResult.achievedContrast };
-        })();
-
-    if (!fixResult) {
-      unfixableFgRelationships.push(rel.id);
-      bgMustMove = true;
-      continue;
-    }
-
-    // Apply fix to working style
-    applyComponentFix(currentStyle, patch, diagnostics, rel, fixResult, bg);
-  }
-
-  // ── Phase 2: Move background if needed ──
-  if (bgMustMove) {
-    const bgResult = fixBackground(config, currentStyle, patch, diagnostics, patternTarget, eyeTarget);
-    if (!bgResult) {
-      return {
-        success: false,
-        reason: 'Unable to find a color adjustment that satisfies all contrast requirements while preserving your design.',
-        unfixableRelationships: unfixableFgRelationships,
+      const newBgOptions = {
+        ...currentStyle.backgroundOptions,
+        color: newBg,
+        gradient: undefined,
       };
+
+      currentStyle.backgroundOptions = newBgOptions;
+      patch.backgroundOptions = newBgOptions;
     }
-    currentStyle = bgResult;
-  }
 
-  // ── Phase 3: Ripple pass — background change may have broken other relationships ──
-  for (let pass = 0; pass < MAX_BACKGROUND_RIPPLE_PASSES; pass++) {
-    const postRelationships = buildRelationships(currentStyle, patternTarget, eyeTarget);
-    let anyNewFailure = false;
+    const relationships = buildRelationships(currentStyle, patternTarget, eyeTarget);
+    let anyUnfixable = false;
 
-    for (const rel of postRelationships) {
+    for (const rel of relationships) {
       const contrast = getContrastForRelationship(rel);
       if (contrast >= rel.target || contrast === -1) continue;
 
-      anyNewFailure = true;
+      const bgLum = hexLum(rel.bgColor);
       const hasGradient = !!rel.fgGradient;
+
+      if (!hasGradient && isForegroundInfeasible(bgLum, rel.target)) {
+        anyUnfixable = true;
+        break;
+      }
 
       const fixResult = hasGradient
         ? fixGradientContrast(rel.fgColor, rel.fgGradient, rel.bgColor, rel.bgGradient, rel.target)
@@ -237,19 +226,62 @@ export function autoFixContrast(
             return { adjustedSolidColor: solidResult.hex, adjustedGradient: undefined as unknown as QRGradient, achievedContrast: solidResult.achievedContrast };
           })();
 
-      if (fixResult) {
-        applyComponentFix(
-          currentStyle, patch, diagnostics, rel, fixResult,
-          currentStyle.backgroundOptions.color,
-        );
+      if (!fixResult) {
+        anyUnfixable = true;
+        break;
       }
+
+      applyComponentFix(currentStyle, patch, diagnostics, rel, fixResult, currentStyle.backgroundOptions.color);
     }
 
-    if (!anyNewFailure) break;
+    if (anyUnfixable) return null;
+
+    let totalCost = 0;
+    for (const diag of diagnostics) {
+      const weight = weights[diag.component as keyof ComponentCostWeights] ?? 1.0;
+      totalCost += (diag.visualChangeMagnitude ?? 0) * weight;
+    }
+
+    return { cost: totalCost, patch, diagnostics };
+  };
+
+  const candidates: Strategy[] = ['fg-first', 'symmetric'];
+
+  // Generate background candidates
+  const originalBg = config.style.backgroundOptions.color;
+  const maxTarget = Math.max(patternTarget, eyeTarget);
+  
+  const bgSolveResults = solveSolidContrastCandidates(originalBg, config.style.dotOptions.color, maxTarget);
+  for (const r of bgSolveResults) {
+    candidates.push({ type: 'bg-candidate', bgHex: r.hex });
   }
 
-  // ── Phase 4: Final validation ──
-  if (!validateFixResult(config, patch)) {
+  // Fallbacks
+  const origLum = hexLum(originalBg);
+  const primaryFallback = origLum >= 0.5 ? '#000000' : '#ffffff';
+  const altFallback = origLum >= 0.5 ? '#ffffff' : '#000000';
+  candidates.push({ type: 'bg-candidate', bgHex: primaryFallback });
+  candidates.push({ type: 'bg-candidate', bgHex: altFallback });
+
+  let bestStrategy: ReturnType<typeof executeStrategy> = null;
+
+  for (const strat of candidates) {
+    const result = executeStrategy(strat);
+    if (result && (!bestStrategy || result.cost < bestStrategy.cost)) {
+      bestStrategy = result;
+    }
+  }
+
+  if (!bestStrategy) {
+    return {
+      success: false,
+      reason: 'Unable to find a color adjustment that satisfies all contrast requirements while preserving your design.',
+      unfixableRelationships: [],
+    };
+  }
+
+  // Final validation
+  if (!validateFixResult(config, bestStrategy.patch)) {
     return {
       success: false,
       reason: 'The solver found a candidate fix, but it did not pass independent validation. The design may require manual contrast adjustment.',
@@ -258,7 +290,7 @@ export function autoFixContrast(
   }
 
   // Check if any changes were actually made
-  if (diagnostics.length === 0) {
+  if (bestStrategy.diagnostics.length === 0) {
     return {
       success: false,
       reason: 'No contrast issues were found that require fixing.',
@@ -266,7 +298,7 @@ export function autoFixContrast(
     };
   }
 
-  return { success: true, patch, diagnostics };
+  return { success: true, patch: bestStrategy.patch, diagnostics: bestStrategy.diagnostics };
 }
 
 // ── Internal Helpers ──────────────────────────────────────────────────────
@@ -350,72 +382,4 @@ function applyComponentFix(
       break;
     }
   }
-}
-
-/**
- * Fix the background when foreground-only fixes are provably infeasible.
- *
- * Strategy: solve background color against the hardest-to-satisfy foreground,
- * then re-check ALL relationships (ripple).
- */
-function fixBackground(
-  originalConfig: QRConfig,
-  currentStyle: QRStyle,
-  patch: Partial<QRStyle>,
-  diagnostics: FixDiagnostic[],
-  patternTarget: number,
-  eyeTarget: number,
-): QRStyle | null {
-  const originalBg = originalConfig.style.backgroundOptions.color;
-  const maxTarget = Math.max(patternTarget, eyeTarget);
-
-  // Solve: find the minimum-cost background change that lets the hardest
-  // foreground element meet its target.
-  // We try adjusting the background against the pattern first (it's the most
-  // common relationship), then validate the result against all others.
-  const patternColor = currentStyle.dotOptions.color;
-
-  // Invert the problem: solve bg against fg
-  let bgResult = solveSolidContrast(originalBg, patternColor, maxTarget);
-  let newBg: string;
-
-  if (bgResult) {
-    newBg = bgResult.hex;
-  } else {
-    // Both foreground and background are mid-gray, making it impossible
-    // to adjust only one. We push the background towards the nearest extreme
-    // just enough to allow the ripple pass to fix the foreground.
-    const origLum = hexLum(originalBg);
-    const extremeFg = origLum >= 0.5 ? '#000000' : '#ffffff';
-    const fallbackBgResult = solveSolidContrast(originalBg, extremeFg, 21);
-    
-    if (fallbackBgResult) {
-      newBg = fallbackBgResult.hex;
-    } else {
-      newBg = origLum >= 0.5 ? '#ffffff' : '#000000';
-    }
-  }
-
-  const existingIdx = diagnostics.findIndex(d => d.component === 'background');
-  const origBeforeHex = existingIdx !== -1 ? diagnostics[existingIdx].before : originalBg;
-  const origContrast = existingIdx !== -1 ? diagnostics[existingIdx].contrastBefore : undefined;
-
-  const newDiag = computeDiagnostic(
-    'background', 'background adjustment', origBeforeHex, newBg, patternColor,
-  );
-  if (origContrast !== undefined) newDiag.contrastBefore = origContrast;
-
-  if (existingIdx !== -1) diagnostics[existingIdx] = newDiag;
-  else diagnostics.push(newDiag);
-
-  const newBgOptions = {
-    ...currentStyle.backgroundOptions,
-    color: newBg,
-    gradient: undefined, // Clear gradient when bg must move
-  };
-
-  currentStyle.backgroundOptions = newBgOptions;
-  patch.backgroundOptions = newBgOptions;
-
-  return currentStyle;
 }
