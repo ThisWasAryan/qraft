@@ -6,6 +6,15 @@ Built entirely as a local-first application, QRaft allows users to create struct
 
 Everything required for generation and customization runs locally in the browser. QR payloads are not sent to a backend, and the application does not use analytics or tracking.
 
+---
+<img width="1103" height="940" alt="image" src="https://github.com/user-attachments/assets/a54e43f4-c2bf-444c-945e-9871020a0296" />
+
+---
+
+<img width="321" height="625" alt="image" src="https://github.com/user-attachments/assets/9b61156c-c447-4322-a951-2bba6d474aab" /> <img width="322" height="702" alt="image" src="https://github.com/user-attachments/assets/758102d3-93cb-4512-b7f8-45b1e0b0a41e" /> <img width="318" height="761" alt="image" src="https://github.com/user-attachments/assets/0513dc16-6e0e-4ccf-8cc9-f734ba8ff1a7" />
+
+---
+
 ## Core Philosophy
 
 - Privacy: Payloads are processed locally without requiring an account or server transmission.
