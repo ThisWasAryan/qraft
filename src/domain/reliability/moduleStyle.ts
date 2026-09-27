@@ -111,12 +111,12 @@ export function checkGradientContrast(style: QRStyle): QRReliabilityCheck {
   
   // Calculate worst case against Eye Frames (falls back to dots if not defined)
   const squareColor = style.cornerSquareOptions.color || style.dotOptions.color;
-  const squareGradient = style.cornerSquareOptions.gradient || style.dotOptions.gradient;
+  const squareGradient = (style.cornerSquareOptions.color || style.cornerSquareOptions.gradient) ? style.cornerSquareOptions.gradient : style.dotOptions.gradient;
   const squareContrast = getWorstCaseContrast(squareColor, squareGradient, bg, bgGradient);
 
   // Calculate worst case against Eye Centers (falls back to eye frames if not defined)
   const dotCenterColor = style.cornerDotOptions.color || squareColor;
-  const dotCenterGradient = style.cornerDotOptions.gradient || squareGradient;
+  const dotCenterGradient = (style.cornerDotOptions.color || style.cornerDotOptions.gradient) ? style.cornerDotOptions.gradient : squareGradient;
   const dotCenterContrast = getWorstCaseContrast(dotCenterColor, dotCenterGradient, bg, bgGradient);
 
   // Find the absolute minimum contrast across all elements

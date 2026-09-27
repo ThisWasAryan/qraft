@@ -35,7 +35,13 @@ export const Header = () => {
           <div className={styles.logo}>
             <img src="/logo.png" width={24} height={24} alt="QRaft Logo" style={{ borderRadius: '2px' }} />
           </div>
-          <span className={styles.title}>QRaft</span>
+          <span 
+            className={styles.title}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            title="Scroll to top"
+          >
+            QRaft
+          </span>
         </div>
         <div className={styles.actions}>
           <button 

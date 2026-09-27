@@ -7,6 +7,8 @@ import { analyzeReliability } from '../domain/reliability';
 import { generateRandomPalette } from '../domain/randomizer/generateRandomPalette';
 import { getMaxErrorCorrectionLevel } from '../utils/capacity';
 import { QR_PRESETS } from '../domain/presets/registry';
+import { autoFixContrast, type FixDiagnostic } from '../domain/autofix';
+import { useToastStore } from './toastStore';
 
 interface QRState {
   config: QRConfig;
@@ -25,7 +27,7 @@ interface QRState {
   setErrorCorrection: (level: ErrorCorrectionLevel) => void;
   loadConfig: (config: QRConfig) => void;
   resetConfig: () => void;
-  autoFixReliability: () => void;
+  autoFixReliability: () => FixDiagnostic[] | undefined;
   randomizeDesign: () => void;
   applyPreset: (presetId: string) => void;
   resetPreset: () => void;
@@ -221,8 +223,16 @@ export const useQRStore = create<QRState>()(
       },
 
       autoFixReliability: () => {
+        let diagnostics: FixDiagnostic[] = [];
+
         set((state) => {
-          const report = analyzeReliability(state.config);
+          const hasFatalError = state.contentErrors.some(e => e.severity === 'error');
+          const effectiveConfig = hasFatalError ? {
+            ...state.config,
+            content: { type: 'url', url: 'https://thiswasaryan.in/' } as any
+          } : state.config;
+
+          const report = analyzeReliability(effectiveConfig);
           const hasIssues = report.overallScore === 'warning' || report.overallScore === 'danger';
           if (!hasIssues) return state;
 
@@ -230,77 +240,127 @@ export const useQRStore = create<QRState>()(
           const newStyle = { ...newConfig.style };
           let changed = false;
 
+          // ── Intelligent contrast fix ──
+          const hasContrastIssue = report.checks.some(
+            (c) =>
+              (c.id === 'contrast' || c.id === 'gradient-contrast' || c.id === 'eye-contrast') &&
+              c.severity !== 'good',
+          );
+
+          if (hasContrastIssue) {
+            const fixResult = autoFixContrast(effectiveConfig);
+            if (fixResult.success) {
+              diagnostics = fixResult.diagnostics;
+              // Apply contrast patch
+              if (fixResult.patch.dotOptions) {
+                newStyle.dotOptions = { ...newStyle.dotOptions, ...fixResult.patch.dotOptions };
+              }
+              if (fixResult.patch.cornerSquareOptions) {
+                newStyle.cornerSquareOptions = { ...newStyle.cornerSquareOptions, ...fixResult.patch.cornerSquareOptions };
+              }
+              if (fixResult.patch.cornerDotOptions) {
+                newStyle.cornerDotOptions = { ...newStyle.cornerDotOptions, ...fixResult.patch.cornerDotOptions };
+              }
+              if (fixResult.patch.backgroundOptions) {
+                newStyle.backgroundOptions = { ...newStyle.backgroundOptions, ...fixResult.patch.backgroundOptions };
+              }
+              changed = true;
+            } else {
+              useToastStore.getState().addToast(fixResult.reason, 'error');
+            }
+          }
+
+          // ── Non-contrast fixes (kept verbatim) ──
           for (const check of report.checks) {
             if (check.severity === 'good') continue;
 
-            if (check.id === 'contrast' || check.id === 'gradient-contrast') {
-              // Smart Tiered Auto-Fix
-              // Tier 1: Try setting background to pure white
-              const tier1Style = { 
-                ...newStyle, 
-                backgroundOptions: { ...newStyle.backgroundOptions, color: '#FFFFFF', gradient: undefined } 
-              };
-              const tier1Fails = analyzeReliability({ ...newConfig, style: tier1Style }).checks.some(c => 
-                (c.id === 'contrast' || c.id === 'gradient-contrast') && (c.severity === 'warning' || c.severity === 'danger')
-              );
-
-              if (!tier1Fails) {
-                newStyle.backgroundOptions = tier1Style.backgroundOptions;
-              } else {
-                // Tier 2: Try setting background to pure black
-                const tier2Style = { 
-                  ...newStyle, 
-                  backgroundOptions: { ...newStyle.backgroundOptions, color: '#000000', gradient: undefined } 
-                };
-                const tier2Fails = analyzeReliability({ ...newConfig, style: tier2Style }).checks.some(c => 
-                  (c.id === 'contrast' || c.id === 'gradient-contrast') && (c.severity === 'warning' || c.severity === 'danger')
-                );
-
-                if (!tier2Fails) {
-                  newStyle.backgroundOptions = tier2Style.backgroundOptions;
-                } else {
-                  // Tier 3: Nuke
-                  newStyle.dotOptions = { ...newStyle.dotOptions, color: '#000000', gradient: undefined };
-                  newStyle.backgroundOptions = { ...newStyle.backgroundOptions, color: '#FFFFFF', gradient: undefined };
+            if (check.id === 'quiet-zone' || check.id === 'quiet-zone-frame') {
+              const oldMargin = newStyle.margin ?? 0;
+              if (oldMargin < 40) {
+                newStyle.margin = 40;
+                diagnostics.push({
+                  component: 'margin',
+                  relationship: 'Quiet Zone',
+                  before: `${oldMargin}px`,
+                  after: `40px`
+                });
+              }
+              if (newStyle.frame && newStyle.frame.style !== 'none') {
+                const oldPadding = newStyle.frame.padding ?? 0;
+                if (oldPadding < 40) {
+                  newStyle.frame = { ...newStyle.frame, padding: 40 };
+                  diagnostics.push({
+                    component: 'margin',
+                    relationship: 'Frame Padding',
+                    before: `${oldPadding}px`,
+                    after: `40px`
+                  });
                 }
               }
               changed = true;
             }
-            if (check.id === 'eye-contrast') {
-              newStyle.cornerSquareOptions = { ...newStyle.cornerSquareOptions, color: '#000000', gradient: undefined };
-              newStyle.cornerDotOptions = { ...newStyle.cornerDotOptions, color: '#000000', gradient: undefined };
-              changed = true;
-            }
-            if (check.id === 'quiet-zone' || check.id === 'quiet-zone-frame') {
-              newStyle.margin = Math.max(newStyle.margin ?? 0, 40);
-              if (newStyle.frame && newStyle.frame.style !== 'none') {
-                newStyle.frame = { ...newStyle.frame, padding: Math.max(newStyle.frame.padding ?? 0, 40) };
-              }
-              changed = true;
-            }
             if (check.id === 'error-correction-logo' || check.id === 'error-correction') {
-              newConfig.errorCorrection = 'H';
-              changed = true;
+              if (newConfig.errorCorrection !== 'H') {
+                diagnostics.push({
+                  component: 'errorCorrection',
+                  relationship: 'Error Correction Level',
+                  before: newConfig.errorCorrection,
+                  after: 'H'
+                });
+                newConfig.errorCorrection = 'H';
+                changed = true;
+              }
             }
             if (check.id === 'logo-size') {
-              if (newStyle.logo) {
+              if (newStyle.logo && newStyle.logo.size !== 0.2) {
+                diagnostics.push({
+                  component: 'logoSize',
+                  relationship: 'Logo Size',
+                  before: `${Math.round((newStyle.logo.size || 0.2) * 100)}%`,
+                  after: '20%'
+                });
                 newStyle.logo = { ...newStyle.logo, size: 0.2 };
                 changed = true;
               }
             }
             if (check.id === 'module-shape') {
-              newStyle.dotOptions = { ...newStyle.dotOptions, type: 'square' };
-              changed = true;
+              if (newStyle.dotOptions?.type !== 'square') {
+                diagnostics.push({
+                  component: 'shape',
+                  relationship: 'Pattern Shape',
+                  before: newStyle.dotOptions?.type || 'square',
+                  after: 'square'
+                });
+                newStyle.dotOptions = { ...newStyle.dotOptions, type: 'square' };
+                changed = true;
+              }
             }
             if (check.id === 'corner-shape') {
-              newStyle.cornerSquareOptions = { ...newStyle.cornerSquareOptions, type: 'square' };
-              newStyle.cornerDotOptions = { ...newStyle.cornerDotOptions, type: 'dot' };
-              changed = true;
+              if (newStyle.cornerSquareOptions?.type !== 'square' || newStyle.cornerDotOptions?.type !== 'dot') {
+                diagnostics.push({
+                  component: 'shape',
+                  relationship: 'Corner Shape',
+                  before: 'rounded',
+                  after: 'square'
+                });
+                newStyle.cornerSquareOptions = { ...newStyle.cornerSquareOptions, type: 'square' };
+                newStyle.cornerDotOptions = { ...newStyle.cornerDotOptions, type: 'dot' };
+                changed = true;
+              }
             }
             if (check.id === 'output-size') {
-              newStyle.width = Math.max(newStyle.width, 1000);
-              newStyle.height = Math.max(newStyle.height, 1000);
-              changed = true;
+              const oldW = newStyle.width ?? 1000;
+              if (oldW < 1000) {
+                diagnostics.push({
+                  component: 'size',
+                  relationship: 'Output Size',
+                  before: `${oldW}px`,
+                  after: `1000px`
+                });
+                newStyle.width = 1000;
+                newStyle.height = 1000;
+                changed = true;
+              }
             }
           }
 
@@ -311,6 +371,8 @@ export const useQRStore = create<QRState>()(
           
           return state;
         });
+        
+        return diagnostics;
       },
 
       randomizeDesign: () => {

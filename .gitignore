@@ -23,3 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 docs/
+
+# Scratch and test files
+test-*.ts
+fetch_logos.py
+debug.ts
+fix-chroma.ts

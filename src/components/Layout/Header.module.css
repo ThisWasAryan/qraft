@@ -78,6 +78,20 @@
   font-size: 2.25rem;
   font-weight: 900;
   letter-spacing: -0.06em;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  
+  /* Gradient text trick */
+  background: linear-gradient(to right, #ec4899, #8b5cf6, #3b82f6, #10b981, #f59e0b, #ef4444, #ec4899);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: var(--color-text-primary); 
+}
+
+.title:hover {
+  color: transparent;
+  animation: gradientFlow 3s linear infinite;
 }
 
 .actions {

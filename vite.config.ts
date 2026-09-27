@@ -18,7 +18,8 @@ export default defineConfig({
             if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) return 'react-vendor';
             if (id.includes('qr-code-styling')) return 'qr-vendor';
             if (id.includes('zustand') || id.includes('zundo')) return 'state-vendor';
-            if (id.includes('zod') || id.includes('libphonenumber-js')) return 'form-vendor';
+            if (id.includes('libphonenumber-js')) return 'phone-vendor';
+            if (id.includes('zod')) return 'form-vendor';
             if (id.includes('lucide-react')) return 'ui-vendor';
             return 'vendor';
           }
