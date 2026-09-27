@@ -11,7 +11,11 @@ Everything required for generation and customization runs locally in the browser
 
 ---
 
-<img width="321" height="625" alt="image" src="https://github.com/user-attachments/assets/9b61156c-c447-4322-a951-2bba6d474aab" /> <img width="322" height="702" alt="image" src="https://github.com/user-attachments/assets/758102d3-93cb-4512-b7f8-45b1e0b0a41e" /> <img width="318" height="761" alt="image" src="https://github.com/user-attachments/assets/0513dc16-6e0e-4ccf-8cc9-f734ba8ff1a7" />
+<div>
+  <img src="https://github.com/user-attachments/assets/9b61156c-c447-4322-a951-2bba6d474aab" height="500" />
+  <img src="https://github.com/user-attachments/assets/758102d3-93cb-4512-b7f8-45b1e0b0a41e" height="500" />
+  <img src="https://github.com/user-attachments/assets/0513dc16-6e0e-4ccf-8cc9-f734ba8ff1a7" height="500" />
+</div>
 
 ---
 
